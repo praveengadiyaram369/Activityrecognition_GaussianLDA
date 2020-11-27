@@ -1,0 +1,6 @@
+1) pipenv --python 3.7.5 (any python version would work)
+2) pipenv shell
+3) pipenv install numpy
+4) pipenv install Cython
+5) pipenv install -e git+https://github.com/modusdatascience/choldate.git#egg=choldate 
+6) pipenv install sklearn

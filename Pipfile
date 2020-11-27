@@ -1,0 +1,16 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+numpy = "*"
+cython = "*"
+choldate = {editable = true,git = "https://github.com/modusdatascience/choldate.git"}
+gaussianlda = "*"
+sklearn = "*"
+
+[requires]
+python_version = "3.7"
