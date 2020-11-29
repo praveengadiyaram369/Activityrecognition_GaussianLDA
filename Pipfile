@@ -11,6 +11,7 @@ cython = "*"
 choldate = {editable = true,git = "https://github.com/modusdatascience/choldate.git"}
 gaussianlda = "*"
 sklearn = "*"
+pandas = "*"
 
 [requires]
 python_version = "3.7"
