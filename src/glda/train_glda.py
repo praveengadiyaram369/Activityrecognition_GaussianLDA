@@ -7,7 +7,8 @@ vocab = "money business bank finance sheep cow goat pig".split()
 # Really, you'd want to load something more useful!
 #embeddings = np.random.random_sample((8, 1))
 
-embeddings = np.array([[1,0],[1,0],[1,0],[1,0],[0,1],[0,1],[0,1],[0,1]])
+embeddings = np.array([[1.2, 0], [2.4, 0], [4.8, 0], [9.6, 0],
+                       [0, 6.8], [0, 3.6], [0, 2.4], [0, 1.2]])
 
 corpus = [
     [0, 2, 1, 1, 3, 0, 6, 1],
@@ -18,7 +19,7 @@ corpus = [
 output_dir = "saved_model"
 # Prepare a trainer
 trainer = GaussianLDAAliasTrainer(
-    corpus, embeddings, vocab, 2, 0.1, 0.1, save_path=output_dir, show_topics=2
+    corpus, embeddings, vocab, 2, 0.1, save_path=output_dir, show_topics=2
 )
 # Set training running
 trainer.sample(100)

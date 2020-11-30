@@ -12,6 +12,7 @@ choldate = {editable = true,git = "https://github.com/modusdatascience/choldate.
 gaussianlda = "*"
 sklearn = "*"
 pandas = "*"
+jupyter = "*"
 
 [requires]
 python_version = "3.7"

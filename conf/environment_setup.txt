@@ -4,3 +4,5 @@
 4) pipenv install Cython
 5) pipenv install -e git+https://github.com/modusdatascience/choldate.git#egg=choldate 
 6) pipenv install sklearn
+7) pipenv install pandas
+8) pipenv install jupyter
