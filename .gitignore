@@ -131,5 +131,6 @@ dmypy.json
 #project specific settings
 saved_model/*
 src/glda/saved_model/*
+data/*
 data/input_data/*
 data/output_csv/*

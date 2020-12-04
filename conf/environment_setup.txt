@@ -6,3 +6,4 @@
 6) pipenv install sklearn
 7) pipenv install pandas
 8) pipenv install jupyter
+9) pipenv install matplotlib
