@@ -7,3 +7,6 @@
 7) pipenv install pandas
 8) pipenv install jupyter
 9) pipenv install matplotlib
+10) pipenv install scipy
+11) pipenv install pybind11
+12) pipenv install fasttext
