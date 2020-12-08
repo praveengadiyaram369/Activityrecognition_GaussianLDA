@@ -15,8 +15,7 @@ pandas = "*"
 jupyter = "*"
 matplotlib = "*"
 scipy = "*"
-pybind11 = "*"
-fasttext = "*"
+gensim = "*"
 
 [requires]
 python_version = "3.7"
