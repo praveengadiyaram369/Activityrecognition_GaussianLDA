@@ -4,7 +4,10 @@ import glob
 
 from gensim.models import Word2Vec
 from sklearn.decomposition import PCA
-from matplotlib import pyplot
+import matplotlib.pyplot as plt
+
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
 
 
 def load_data(input_txt_filepath):
@@ -26,7 +29,7 @@ def load_data(input_txt_filepath):
 
 
 def get_model(samples):
-    return Word2Vec(sentences=samples, min_count=1, window=5, size=100)
+    return Word2Vec(sentences=samples, min_count=1, window=3, size=200)
 
 
 def get_word_embeddings(input_txt_filepath):
@@ -43,6 +46,57 @@ def get_word_embeddings(input_txt_filepath):
     return vocab, word_embeddings, corpus, activities
 
 
+def plot_vector_similarity(vocab, embeddings):
+
+    vocab_len = len(vocab)
+    cos_sims = np.zeros(shape=(vocab_len, vocab_len))
+    for vec_1 in range(vocab_len):
+        x = np.array(embeddings[vec_1]).reshape(1, -1)
+        for vec_2 in range(vocab_len):
+            cos_sims[vec_1][vec_2] = cosine_similarity(
+                x, np.array(embeddings[vec_2]).reshape(1, -1))
+
+    fig, ax = plt.subplots()
+    im = ax.imshow(cos_sims)
+
+    ax.set_xticks(np.arange(vocab_len))
+    ax.set_yticks(np.arange(vocab_len))
+
+    ax.set_xticklabels(vocab)
+    ax.set_yticklabels(vocab)
+
+    plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
+             rotation_mode="anchor")
+
+    for i in range(vocab_len):
+        for j in range(vocab_len):
+            text = ax.text(j, i, str(cos_sims[i, j] * 100)[:4],
+                           ha="center", va="center", color="w")
+
+    ax.set_title("Cosine similarities of word2vec embeddings")
+    fig.tight_layout()
+    plt.savefig('output/' +
+                'embeddings_similarities.png', bbox_inches='tight')
+    plt.show()
+
+
+def plot_pca(vocab):
+
+    # fit a 2d PCA model to the vectors
+    X = model[vocab]
+    pca = PCA(n_components=2)
+    result = pca.fit_transform(X)
+    # create a scatter plot of the projection
+    plt.scatter(result[:, 0], result[:, 1])
+    words = list(vocab)
+    for i, word in enumerate(words):
+        plt.annotate(word, xy=(result[i, 0], result[i, 1]))
+
+    plt.savefig('output/' +
+                'embeddings_pca_results.png', bbox_inches='tight')
+    plt.show()
+
+
 if __name__ == "__main__":
 
     # _manual testing purpose
@@ -52,21 +106,10 @@ if __name__ == "__main__":
     model = get_model(samples)
     print(model)
 
-    vocab_glda = model.wv.vocab
-    print(list(vocab_glda.keys()))
+    vocab = list(model.wv.vocab.keys())
+    # print(vocab)
+    # print(model.wv.vectors)
 
-    print(model.wv.vectors)
-
-    # fit a 2d PCA model to the vectors
-    X = model[model.wv.vocab]
-    pca = PCA(n_components=2)
-    result = pca.fit_transform(X)
-    # create a scatter plot of the projection
-    pyplot.scatter(result[:, 0], result[:, 1])
-    words = list(model.wv.vocab)
-    for i, word in enumerate(words):
-        pyplot.annotate(word, xy=(result[i, 0], result[i, 1]))
-
-    pyplot.savefig('output/' +
-                   'embeddings_pca_results.png', bbox_inches='tight')
-    pyplot.show()
+    plot_pca(model.wv.vocab)
+    plt.rcParams["figure.figsize"] = [16, 9]
+    plot_vector_similarity(vocab, model.wv.vectors)
