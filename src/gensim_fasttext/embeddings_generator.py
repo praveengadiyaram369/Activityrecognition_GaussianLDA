@@ -17,19 +17,23 @@ def load_data(input_txt_filepath):
 
     sample_list = []
     activity_list = []
+
     for txt_file in txt_files:
+        tmp_list = []
         activity = txt_file.split('/')[-1].split('_')[-1].split('.')[0]
+        activity_list.append('activity_'+str(activity))
 
         data = (open(txt_file, "r")).read().splitlines()
         for doc in data:
-            sample_list.append(doc.split(' '))
-            activity_list.append('activity_'+str(activity))
+            tmp_list.extend(doc.split(' '))
+
+        sample_list.append(tmp_list)
 
     return sample_list, activity_list
 
 
 def get_model(samples):
-    return Word2Vec(sentences=samples, min_count=1, window=3, size=200)
+    return Word2Vec(sentences=samples, min_count=1, window=2, size=100)
 
 
 def get_word_embeddings(input_txt_filepath):

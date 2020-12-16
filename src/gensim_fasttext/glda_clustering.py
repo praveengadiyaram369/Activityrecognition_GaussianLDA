@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
     # Prepare a trainer
     trainer = GaussianLDAAliasTrainer(
-        corpus, embeddings, vocab, num_topics, 0.9, save_path=output_dir, show_topics=num_topics
+        corpus, embeddings, vocab, num_topics, 0.2, save_path=output_dir, show_topics=num_topics
     )
     # Set training running
     trainer.sample(10)
