@@ -36,6 +36,13 @@ def get_model(samples):
     return Word2Vec(sentences=samples, min_count=1, window=2, size=100)
 
 
+def get_corpus(vocab, docs):
+    corpus = []
+    for sample in docs:
+        corpus.append([vocab.index(val) for val in sample])
+    return corpus
+
+
 def get_word_embeddings(input_txt_filepath):
 
     samples, activities = load_data(input_txt_filepath)
@@ -43,11 +50,28 @@ def get_word_embeddings(input_txt_filepath):
 
     vocab = list(model.wv.vocab.keys())
     word_embeddings = model.wv.vectors
-    corpus = []
-    for sample in samples:
-        corpus.append([vocab.index(val) for val in sample])
+    corpus = get_corpus(vocab, samples)
 
     return vocab, word_embeddings, corpus, activities
+
+
+def get_cluster_embeddings(input_txt_filepath, embeddings_filepath):
+
+    samples, activities = load_data(input_txt_filepath)
+    embeddings = []
+
+    data = (open(embeddings_filepath, "r")).read().splitlines()
+    for emb in data:
+        embeddings.append(emb.split(','))
+
+    cluster_embeddings = np.asarray(embeddings, dtype=float)
+
+    vocab = ['X1_A', 'X1_B', 'X1_C', 'Y1_A', 'Y1_B', 'Y1_C', 'Y1_D', 'Z1_A', 'Z1_B',
+             'Z1_C', 'X2_A', 'X2_B', 'X2_C', 'Y2_A', 'Y2_B', 'Y2_C', 'Z2_A', 'Z2_B', 'Z2_C']
+
+    corpus = get_corpus(vocab, samples)
+
+    return vocab, cluster_embeddings, corpus, activities
 
 
 def plot_vector_similarity(vocab, embeddings):
