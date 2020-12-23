@@ -14,4 +14,30 @@ Words using topics: 0=0.0%, 1=1.2%, 2=98.8%
 2: Z2_C (2.00e-01) X2_C (1.83e-01) X1_A (1.65e-01) X2_B (1.51e-01) Y2_B (1.31e-01) Z2_B (7.78e-02) Y1_B (4.97e-02) Z1_C (2.06e-02) Y2_C (1.27e-02) Z1_B (8.59e-03)
 Words using topics: 0=0.1%, 1=93.4%, 2=6.5%
 
+3) Without Normalization: window size 20 and 50% overlap
 
+{}: unused
+1: Z1_B (3.45e-01) X1_C (1.90e-01) Z1_A (1.73e-01) Y1_B (1.24e-01) Y1_A (1.09e-01) Y1_D (4.63e-02) X1_B (9.75e-03) X1_A (3.18e-03) Y2_B (7.13e-05) Z2_C (2.67e-06)
+{}: unused
+Words using topics: 0=0.0%, 1=100.0%, 2=0.0%
+
+4) Without Normalization: window size 30 and 50% overlap
+
+0: Z1_B (3.24e-01) Y1_C (2.21e-01) Z1_A (1.71e-01) X1_C (1.59e-01) Y1_A (5.75e-02) Y1_B (3.87e-02) X1_A (2.28e-02) X1_B (5.18e-03) Y2_B (4.10e-05) Z1_C (1.28e-06)
+{}: unused
+{}: unused
+Words using topics: 0=100.0%, 1=0.0%, 2=0.0%
+
+5) Without Normalization: window size 40 and 50% overlap
+
+{}: unused
+1: Z1_B (3.50e-01) Z1_A (2.20e-01) X1_A (1.57e-01) Y1_B (1.20e-01) X1_B (5.72e-02) Y1_C (5.48e-02) Y1_A (3.36e-02) X1_C (6.82e-03) Y2_C (3.37e-05) Z1_C (4.33e-08)
+{}: unused
+Words using topics: 0=0.0%, 1=100.0%, 2=0.0%
+
+6) Without Normalization: window size 50 and 50% overlap
+
+0: Z1_B (3.04e-01) Y1_A (2.31e-01) Z1_A (1.80e-01) X1_C (1.63e-01) X1_A (5.50e-02) Y1_B (4.65e-02) Y1_D (1.37e-02) X1_B (7.83e-03) Y2_C (1.03e-05) Z1_C (3.56e-08)
+{}: unused
+{}: unused
+Words using topics: 0=100.0%, 1=0.0%, 2=0.0%
