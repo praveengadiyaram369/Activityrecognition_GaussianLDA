@@ -135,3 +135,4 @@ data/input_dat/*
 data/output_csv/*
 src/gensim_fasttext/saved_model/*
 .vscode/
+src/glda_on_sensorydata/saved_model/*

@@ -1,0 +1,43 @@
+###################################### Testing #######################################
+
+1) Applying Min-Max Normalization on every sensor channel for each subject.
+
+{}: unused
+1: Y1_D (9.74e-01) Y2_A (2.48e-02) X2_A (7.37e-04) Z2_A (6.51e-04) X1_A (2.12e-05) X2_B (8.39e-08) Z2_C (6.90e-08) Y2_C (4.85e-12) Y1_B (6.66e-21) Z1_B (1.68e-21)
+2: Y1_B (3.75e-01) Y1_C (2.64e-01) X1_A (1.92e-01) X1_B (9.38e-02) Z1_B (4.03e-02) X1_C (3.22e-02) Z2_C (2.64e-03) Z1_A (5.27e-04) X2_B (3.44e-04) Y1_A (4.25e-05)
+Words using topics: 0=0.0%, 1=1.2%, 2=98.8%
+
+2) Applying Z-score Standardization on every sensor channel for each subject.
+
+0: Y1_C (1.00e+00) Z1_A (3.69e-06) Z2_B (8.66e-17) Y1_A (5.97e-17) X2_C (3.57e-17) Y2_C (1.31e-17) X1_C (9.55e-18) Z1_B (3.63e-18) Y1_B (2.46e-18) X1_A (3.48e-20)
+1: Y1_B (2.91e-01) Z1_B (2.76e-01) Z1_A (1.93e-01) X1_B (1.18e-01) Y1_A (8.04e-02) X1_C (3.21e-02) X1_A (9.32e-03) Z2_C (1.80e-14) Z2_B (6.13e-24) Y2_C (3.16e-33)
+2: Z2_C (2.00e-01) X2_C (1.83e-01) X1_A (1.65e-01) X2_B (1.51e-01) Y2_B (1.31e-01) Z2_B (7.78e-02) Y1_B (4.97e-02) Z1_C (2.06e-02) Y2_C (1.27e-02) Z1_B (8.59e-03)
+Words using topics: 0=0.1%, 1=93.4%, 2=6.5%
+
+3) Without Normalization: window size 20 and 50% overlap
+
+{}: unused
+1: Z1_B (3.45e-01) X1_C (1.90e-01) Z1_A (1.73e-01) Y1_B (1.24e-01) Y1_A (1.09e-01) Y1_D (4.63e-02) X1_B (9.75e-03) X1_A (3.18e-03) Y2_B (7.13e-05) Z2_C (2.67e-06)
+{}: unused
+Words using topics: 0=0.0%, 1=100.0%, 2=0.0%
+
+4) Without Normalization: window size 30 and 50% overlap
+
+0: Z1_B (3.24e-01) Y1_C (2.21e-01) Z1_A (1.71e-01) X1_C (1.59e-01) Y1_A (5.75e-02) Y1_B (3.87e-02) X1_A (2.28e-02) X1_B (5.18e-03) Y2_B (4.10e-05) Z1_C (1.28e-06)
+{}: unused
+{}: unused
+Words using topics: 0=100.0%, 1=0.0%, 2=0.0%
+
+5) Without Normalization: window size 40 and 50% overlap
+
+{}: unused
+1: Z1_B (3.50e-01) Z1_A (2.20e-01) X1_A (1.57e-01) Y1_B (1.20e-01) X1_B (5.72e-02) Y1_C (5.48e-02) Y1_A (3.36e-02) X1_C (6.82e-03) Y2_C (3.37e-05) Z1_C (4.33e-08)
+{}: unused
+Words using topics: 0=0.0%, 1=100.0%, 2=0.0%
+
+6) Without Normalization: window size 50 and 50% overlap
+
+0: Z1_B (3.04e-01) Y1_A (2.31e-01) Z1_A (1.80e-01) X1_C (1.63e-01) X1_A (5.50e-02) Y1_B (4.65e-02) Y1_D (1.37e-02) X1_B (7.83e-03) Y2_C (1.03e-05) Z1_C (3.56e-08)
+{}: unused
+{}: unused
+Words using topics: 0=100.0%, 1=0.0%, 2=0.0%
