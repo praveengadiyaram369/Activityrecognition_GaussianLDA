@@ -18,6 +18,7 @@ matplotlib = "*"
 scipy = "*"
 gensim = "*"
 pyqt5 = "*"
+statistics = "*"
 
 [requires]
 python_version = "3.7"
