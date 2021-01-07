@@ -136,3 +136,4 @@ data/output_csv/*
 src/gensim_fasttext/saved_model/*
 .vscode/
 src/glda_on_sensorydata/saved_model/*
+src/glda_clustering_statistics/saved_model/*
