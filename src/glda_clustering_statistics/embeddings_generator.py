@@ -3,6 +3,13 @@ import os
 import glob
 import numpy as np
 
+from sklearn.model_selection import train_test_split
+
+train_docs = []
+train_doc_labels = []
+test_docs = []
+test_doc_labels = []
+
 
 def generate_cluster_names(sequence_names, cluster_cnt=100):
 
@@ -34,7 +41,17 @@ def load_data(input_txt_filepath):
 
         sample_list.append(tmp_list)
 
-    return sample_list, activity_list
+    for doc, label in zip(sample_list, activity_list):
+        train_doc, test_doc = train_test_split(
+            doc, test_size=0.25, random_state=1)
+
+        train_docs.append(train_doc)
+        test_docs.append(test_doc)
+
+        train_doc_labels.append(label)
+        test_doc_labels.append(label)
+
+    return train_docs, train_doc_labels
 
 
 def get_corpus(vocab, docs):
@@ -85,3 +102,7 @@ def get_cluster_embeddings(input_txt_filepath, embeddings_filepath):
     corpus = get_corpus(vocab_updated, samples)
 
     return vocab_updated, cluster_embeddings, corpus, activities
+
+
+def get_test_documents():
+    return test_docs, test_doc_labels
