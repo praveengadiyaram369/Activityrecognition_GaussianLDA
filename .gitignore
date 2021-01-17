@@ -138,3 +138,4 @@ src/gensim_fasttext/saved_model/*
 src/glda_on_sensorydata/saved_model/*
 src/glda_clustering_statistics/saved_model/*
 data/extra_sensory_data/
+src/glda_extrasensorydata/saved_model/*

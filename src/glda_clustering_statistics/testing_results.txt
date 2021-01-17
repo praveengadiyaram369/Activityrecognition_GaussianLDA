@@ -1,0 +1,60 @@
+########################## activities ##################
+activity_16 -> vaccum cleaning
+activity_2  -> sitting
+activity_4  -> standing
+activity_3  -> walking
+activity_17 -> ironing
+activity_7 ->  Nordic walking
+activity_6 -> cycling
+activity_1 -> lying
+
+########################## activitiy-topic mapping ##################
+{'activity_1': 'Topic5', 'activity_7': 'Topic1', 'activity_3': 'Topic4', 'activity_2': 'Topic3', 'activity_16': 'Topic0', 'activity_6': 'Topic2', 'activity_4': 'Topic6', 'activity_17': 'Topic7'}
+
+
+########################## Hierarchical clustering ##################
+----------- activity_16 --------------
+Topic: 7  = 67.36979924352633
+Topic: 3  = 31.611870817573468
+Topic: 4  = 0.901949374454466
+Topic: 1  = 0.08728542333430317
+Topic: 2  = 0.02909514111143439
+----------- activity_2 --------------
+Topic: 3  = 52.27337311736289
+Topic: 7  = 45.65217391304348
+Topic: 4  = 2.0744529695936342
+----------- activity_4 --------------
+Topic: 7  = 74.79160234640321
+Topic: 3  = 24.68354430379747
+Topic: 4  = 0.5248533497993207
+----------- activity_3 --------------
+Topic: 7  = 49.715340821664874
+Topic: 3  = 47.34574549930758
+Topic: 4  = 2.938913679027543
+----------- activity_17 --------------
+Topic: 7  = 67.4550346976349
+Topic: 3  = 31.36949440589152
+Topic: 4  = 1.161308596516074
+Topic: 1  = 0.0141622999575131
+----------- activity_7 --------------
+Topic: 7  = 75.6989247311828
+Topic: 3  = 22.41521918941274
+Topic: 6  = 0.8933002481389578
+Topic: 4  = 0.41356492969396197
+Topic: 2  = 0.2977667493796526
+Topic: 1  = 0.2812241521918941
+----------- activity_6 --------------
+Topic: 7  = 51.20499007655231
+Topic: 3  = 46.640204139495324
+Topic: 4  = 1.445988091862773
+Topic: 1  = 0.6946413382478027
+Topic: 2  = 0.01417635384179189
+----------- activity_1 --------------
+Topic: 3  = 50.533676849466325
+Topic: 7  = 47.55244755244755
+Topic: 4  = 1.9138755980861244
+
+########################## evaluation metrics ##################
+Accuracy 0.15672101449275364
+Adjusted Rand Index Score 0.01170881031837281
+Weighted Average Scores {'precision': 0.10018306826431823, 'recall': 0.15672101449275364, 'f1-score': 0.07028396292008436, 'support': 55200}
