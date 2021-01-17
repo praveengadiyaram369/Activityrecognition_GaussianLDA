@@ -3,23 +3,12 @@ import os
 import glob
 import numpy as np
 
-from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import PowerTransformer
 
-train_docs = []
-train_doc_labels = []
-test_docs = []
-test_doc_labels = []
+def generate_words(cluster_cnts):
 
-
-def generate_cluster_names(sequence_names, cluster_cnt=100):
-
-    words_dict = {}
-
-    for seq in sequence_names:
-        prefix = seq
-        words_dict[seq] = [prefix+'_'+str(i) for i in range(cluster_cnt)]
-
-    return words_dict
+    prefix = 'W_'
+    return [prefix+str(val) for val in range(1, cluster_cnts+1)]
 
 
 def load_data(input_txt_filepath):
@@ -41,17 +30,7 @@ def load_data(input_txt_filepath):
 
         sample_list.append(tmp_list)
 
-    for doc, label in zip(sample_list, activity_list):
-        train_doc, test_doc = train_test_split(
-            doc, test_size=0.25, random_state=1)
-
-        train_docs.append(train_doc)
-        test_docs.append(test_doc)
-
-        train_doc_labels.append(label)
-        test_doc_labels.append(label)
-
-    return train_docs, train_doc_labels
+    return sample_list, activity_list
 
 
 def get_corpus(vocab, docs):
@@ -63,17 +42,12 @@ def get_corpus(vocab, docs):
 
 def filter_embeddings(vocab, embeddings):
 
-    cluster_cnt = 100
-    sequence_names = ['X1', 'Y1', 'Z1', 'X2', 'Y2', 'Z2']
-    cluster_names = generate_cluster_names(sequence_names, cluster_cnt)
-
-    total_clusters = []
-    for key, val in cluster_names.items():
-        total_clusters.extend(val)
+    cluster_cnts = 100
+    cluster_names = generate_words(cluster_cnts)
 
     final_vocab = []
     final_embeddings = []
-    for idx, word in enumerate(total_clusters):
+    for idx, word in enumerate(cluster_names):
         if word in vocab:
             final_vocab.append(word)
             final_embeddings.append(embeddings[idx])
@@ -101,8 +75,7 @@ def get_cluster_embeddings(input_txt_filepath, embeddings_filepath):
 
     corpus = get_corpus(vocab_updated, samples)
 
+    power = PowerTransformer(method='yeo-johnson', standardize=True)
+    cluster_embeddings = power.fit_transform(cluster_embeddings)
+
     return vocab_updated, cluster_embeddings, corpus, activities
-
-
-def get_test_documents():
-    return test_docs, test_doc_labels

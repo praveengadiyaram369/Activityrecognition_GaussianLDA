@@ -1,8 +1,17 @@
 import os
 import numpy as np
 from gaussianlda import GaussianLDAAliasTrainer
+from gaussianlda.model import GaussianLDA
+from collections import Counter
 
-from embeddings_generator import get_cluster_embeddings
+from embeddings_generator import get_cluster_embeddings, get_test_documents
+
+
+def print_testresults(test_results):
+
+    for key, val in test_results.items():
+        print(f'{key} -> {val}')
+
 
 if __name__ == "__main__":
 
@@ -24,4 +33,18 @@ if __name__ == "__main__":
         corpus, embeddings, vocab, num_topics, 0.2, save_path=output_dir, show_topics=num_topics
     )
     # Set training running
-    trainer.sample(5)
+    trainer.sample(3)
+
+    output_dir = "saved_model"
+    model = GaussianLDA.load(output_dir)
+
+    test_docs, test_doc_labels = get_test_documents()
+
+    iterations = 10
+
+    test_results = {}
+    for doc, activity in zip(test_docs, test_doc_labels):
+        test_topics = model.sample(doc, iterations)
+        test_results[activity] = Counter(test_topics)
+
+    print_testresults(test_results)
