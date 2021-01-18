@@ -36,15 +36,15 @@ def load_data(input_txt_filepath):
 
         sample_list.append(tmp_list)
 
-        for doc, label in zip(sample_list, activity_list):
-            train_doc, test_doc = train_test_split(
-                doc, test_size=0.25, random_state=1)
+    for doc, label in zip(sample_list, activity_list):
+        train_doc, test_doc = train_test_split(
+            doc, test_size=0.25, random_state=1)
 
-            train_docs.append(train_doc)
-            test_docs.append(test_doc)
+        train_docs.append(train_doc)
+        test_docs.append(test_doc)
 
-            train_doc_labels.append(label)
-            test_doc_labels.append(label)
+        train_doc_labels.append(label)
+        test_doc_labels.append(label)
 
     return train_docs, train_doc_labels
 

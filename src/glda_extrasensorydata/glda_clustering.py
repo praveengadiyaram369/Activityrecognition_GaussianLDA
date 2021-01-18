@@ -42,15 +42,15 @@ if __name__ == "__main__":
     vocab, embeddings, corpus, activity_labels = get_cluster_embeddings(
         input_txt_filepath, embeddings_filepath)
 
-    # num_topics = len(set(activity_labels))
-    # output_dir = "saved_model"
+    num_topics = len(set(activity_labels))
+    output_dir = "saved_model"
 
-    # # Prepare a trainer
-    # trainer = GaussianLDAAliasTrainer(
-    #     corpus, embeddings, vocab, num_topics, 0.2, save_path=output_dir, show_topics=num_topics
-    # )
-    # # Set training running
-    # trainer.sample(3)
+    # Prepare a trainer
+    trainer = GaussianLDAAliasTrainer(
+        corpus, embeddings, vocab, num_topics, 0.2, save_path=output_dir, show_topics=num_topics
+    )
+    # Set training running
+    trainer.sample(3)
 
     activity_topic_mapping = get_activity_topic_mapping(activity_labels)
 
