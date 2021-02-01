@@ -3,6 +3,8 @@ import re
 import numpy as np
 import pandas as pd
 
+import matplotlib.pyplot as plt
+
 
 def topic_doc_mapping(topic_doc_counts_df):
 
@@ -46,10 +48,32 @@ def get_activity_topic_mapping(activity_labels):
     with open("saved_model/table_counts_per_doc.pkl", "rb") as doc:
         data = pickle.load(doc)
 
+    topic_index = ['Topic'+str(i) for i in list(range(len(activity_labels)))]
+
     topic_doc_counts_df = pd.DataFrame(
-        data, index=['Topic'+str(i) for i in list(range(8))], columns=activity_labels)
+        data, index=topic_index, columns=activity_labels)
     print(topic_doc_counts_df.T)
 
+    fig, ax = plt.subplots()
+
+    # hide axes
+    ax.axis('off')
+    ax.axis('tight')
+
+    activity_labels.insert(0, 'mapping')
+    topic_doc_counts_df['aa'] = topic_index
+    topic_doc_counts_df = topic_doc_counts_df.reindex(
+        sorted(topic_doc_counts_df.columns), axis=1)
+
+    ax.table(cellText=topic_doc_counts_df.values,
+             colLabels=activity_labels, loc='center')
+
+    fig.tight_layout()
+
+    plt.savefig('output/' +
+                'activity_topic_mapping.png', bbox_inches='tight')
+
+    topic_doc_counts_df.drop(['aa'], axis=1, inplace=True)
     return topic_doc_mapping(topic_doc_counts_df)
 
 

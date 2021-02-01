@@ -11,3 +11,4 @@
 11) pipenv install gensim
 12) pipenv install autopep8 --dev
 13) pipenv install PyQt5
+14) pipenv install umap-learn

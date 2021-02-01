@@ -11,6 +11,7 @@ train_doc_labels = []
 test_docs = []
 test_doc_labels = []
 
+
 def generate_words(cluster_cnts):
 
     prefix = 'W_'
@@ -58,7 +59,7 @@ def get_corpus(vocab, docs):
 
 def filter_embeddings(vocab, embeddings):
 
-    cluster_cnts = 100
+    cluster_cnts = 60
     cluster_names = generate_words(cluster_cnts)
 
     final_vocab = []
@@ -95,6 +96,7 @@ def get_cluster_embeddings(input_txt_filepath, embeddings_filepath):
     cluster_embeddings = power.fit_transform(cluster_embeddings)
 
     return vocab_updated, cluster_embeddings, corpus, activities
+
 
 def get_test_documents():
     return test_docs, test_doc_labels

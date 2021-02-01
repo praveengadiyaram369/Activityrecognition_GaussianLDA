@@ -19,8 +19,6 @@ scipy = "*"
 gensim = "*"
 pyqt5 = "*"
 statistics = "*"
-importlib-metadata = "<2"
-scikit-learn-extra = "*"
 umap-learn = "*"
 
 [requires]

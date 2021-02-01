@@ -15,19 +15,26 @@ def print_testresults(test_results, classification_report_dict):
 
     accuracy = classification_report_dict['accuracy']
     ari = classification_report_dict['adjusted_rand_index_score']
-    weighted_scores = classification_report_dict['weighted avg']
+    weighted_average_precision = classification_report_dict['weighted avg']['precision']
+    weighted_average_recall = classification_report_dict['weighted avg']['recall']
+    weighted_average_f1_score = classification_report_dict['weighted avg']['f1-score']
 
-    print(f'Accuracy {accuracy}')
+    print(f'Accuracy {accuracy*100}')
     print(f'Adjusted Rand Index Score {ari}')
-    print(f'Weighted Average Scores {weighted_scores}')
+    print(
+        f'Weighted Average weighted_average_precision {weighted_average_precision*100}')
+    print(
+        f'Weighted Average weighted_average_recall {weighted_average_recall*100}')
+    print(
+        f'Weighted Average weighted_average_f1_score {weighted_average_f1_score*100}')
 
-    for key, val in test_results.items():
+    # for key, val in test_results.items():
 
-        print(f'----------- {key} --------------')
-        total_words = val[1]
-        for distribution in val[0].most_common():
-            percentage = (distribution[1]/total_words) * 100
-            print(f'Topic: {distribution[0]}  = {percentage}')
+    #     print(f'----------- {key} --------------')
+    #     total_words = val[1]
+    #     for distribution in val[0].most_common():
+    #         percentage = (distribution[1]/total_words) * 100
+    #         print(f'Topic: {distribution[0]}  = {percentage}')
 
 
 if __name__ == "__main__":
@@ -76,7 +83,7 @@ if __name__ == "__main__":
         test_results[activity] = (Counter(test_topics), len(test_topics))
 
     classification_report_dict = classification_report(
-        test_doc_true, test_doc_glda, target_names=activity_labels, output_dict=True)
+        test_doc_true, test_doc_glda, output_dict=True)
     classification_report_dict['adjusted_rand_index_score'] = adjusted_rand_score(
         test_doc_true, test_doc_glda)
 
