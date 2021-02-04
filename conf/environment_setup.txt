@@ -12,3 +12,5 @@
 12) pipenv install autopep8 --dev
 13) pipenv install PyQt5
 14) pipenv install umap-learn
+15) pipenv install tensorflow==2.2.0
+16) pipenv install keras-tuner

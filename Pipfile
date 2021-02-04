@@ -20,6 +20,8 @@ gensim = "*"
 pyqt5 = "*"
 statistics = "*"
 umap-learn = "*"
+tensorflow = "==2.2.0"
+keras-tuner = "*"
 
 [requires]
 python_version = "3.7"

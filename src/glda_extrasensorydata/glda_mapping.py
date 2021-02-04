@@ -74,6 +74,7 @@ def get_activity_topic_mapping(activity_labels):
                 'activity_topic_mapping.png', bbox_inches='tight')
 
     topic_doc_counts_df.drop(['aa'], axis=1, inplace=True)
+    activity_labels.pop(0)
     return topic_doc_mapping(topic_doc_counts_df)
 
 
