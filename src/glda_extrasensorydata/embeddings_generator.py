@@ -57,10 +57,9 @@ def get_corpus(vocab, docs):
     return corpus
 
 
-def filter_embeddings(vocab, embeddings):
+def filter_embeddings(vocab, embeddings, clustering_cnts):
 
-    cluster_cnts = 60
-    cluster_names = generate_words(cluster_cnts)
+    cluster_names = generate_words(clustering_cnts)
 
     final_vocab = []
     final_embeddings = []
@@ -72,30 +71,30 @@ def filter_embeddings(vocab, embeddings):
     return final_vocab, final_embeddings
 
 
-def get_cluster_embeddings(input_txt_filepath, embeddings_filepath):
+def get_cluster_embeddings(input_txt_filepath, embeddings_filepath, clustering_cnts):
 
     samples, activities = load_data(input_txt_filepath)
 
-    # vocab = cluster_vocab.copy()
-    total_words = []
-    for sample in samples:
-        total_words.extend(set(sample))
-    vocab = set(total_words)
+    # total_words = []
+    # for sample in samples:
+    #     total_words.extend(set(sample))
+    # vocab = set(total_words)
+    vocab = generate_words(clustering_cnts)
 
     data = (open(embeddings_filepath, "r")).read().splitlines()
     embeddings = [emb.split(',') for emb in data]
 
-    vocab_updated, embeddings_updated = filter_embeddings(vocab, embeddings)
-    cluster_embeddings = np.array(embeddings_updated)
+    #vocab_updated, embeddings_updated = filter_embeddings(vocab, embeddings, clustering_cnts)
+    cluster_embeddings = np.array(embeddings)
     cluster_embeddings[cluster_embeddings == ''] = '0.0'
     cluster_embeddings = cluster_embeddings.astype(np.float)
 
-    corpus = get_corpus(vocab_updated, samples)
+    corpus = get_corpus(vocab, samples)
 
     power = PowerTransformer(method='yeo-johnson', standardize=True)
     cluster_embeddings = power.fit_transform(cluster_embeddings)
 
-    return vocab_updated, cluster_embeddings, corpus, activities
+    return vocab, cluster_embeddings, corpus, activities
 
 
 def get_test_documents():

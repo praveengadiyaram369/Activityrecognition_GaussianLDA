@@ -38,7 +38,7 @@ def test_glda_clustering(logger, activity_topic_mapping, clustering_algo, cluste
 
     test_docs, test_doc_labels = get_test_documents()
 
-    iterations = 200
+    iterations = 150
 
     test_results = {}
 
@@ -76,7 +76,7 @@ def perform_glda_clustering(logger, clustering_algo, clustering_cnts):
     ) + f'/clustering_output/featues_from_clustering.txt'
 
     vocab, embeddings, corpus, activity_labels = get_cluster_embeddings(
-        input_txt_filepath, embeddings_filepath)
+        input_txt_filepath, embeddings_filepath, clustering_cnts)
 
     num_topics = len(set(activity_labels))
     output_dir = "saved_model"
@@ -90,7 +90,7 @@ def perform_glda_clustering(logger, clustering_algo, clustering_cnts):
             corpus, embeddings, vocab, num_topics, alpha, save_path=output_dir, show_topics=num_topics
         )
         # Set training running
-        trainer.sample(5)
+        trainer.sample(3)
 
         logger.info(
             f'Finished glda clustering')
