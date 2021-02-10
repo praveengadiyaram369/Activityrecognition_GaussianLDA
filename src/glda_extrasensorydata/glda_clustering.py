@@ -23,7 +23,7 @@ def write_testresults(logger, test_results, classification_report_dict, clusteri
     glda_output = [clustering_algo, clustering_cnts, alpha, accuracy, ari,
                    weighted_average_precision, weighted_average_recall, weighted_average_f1_score]
 
-    with open("output/glda_performance_data.csv", "a", newline='') as fp:
+    with open("output/glda_performance_data1.csv", "a", newline='') as fp:
         wr = csv.writer(fp, dialect='excel')
         wr.writerow(glda_output)
 
@@ -75,7 +75,7 @@ def perform_glda_clustering(logger, clustering_algo, clustering_cnts):
     embeddings_filepath = os.getcwd(
     ) + f'/clustering_output/featues_from_clustering.txt'
 
-    vocab, embeddings, corpus, activity_labels = get_cluster_embeddings(
+    vocab, embeddings, corpus, activity_labels, activity_doc_count_index = get_cluster_embeddings(
         input_txt_filepath, embeddings_filepath, clustering_cnts)
 
     num_topics = len(set(activity_labels))
@@ -95,7 +95,7 @@ def perform_glda_clustering(logger, clustering_algo, clustering_cnts):
         logger.info(
             f'Finished glda clustering')
 
-        activity_topic_mapping = get_activity_topic_mapping(activity_labels)
+        activity_topic_mapping = get_activity_topic_mapping(activity_labels, activity_doc_count_index)
 
         test_glda_clustering(logger, activity_topic_mapping,
                              clustering_algo, clustering_cnts, alpha)

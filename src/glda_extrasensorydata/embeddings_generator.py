@@ -23,31 +23,40 @@ def load_data(input_txt_filepath):
     # _get all txt files inside file_path
     txt_files = glob.glob(input_txt_filepath)
 
-    sample_list = []
     activity_list = []
+    activity_doc_count_index = []
+    doc_count = 0
 
     for txt_file in txt_files:
-        tmp_list = []
+        start_ind = 0
         activity = txt_file.split('/')[-1].split('_')[-1].split('.')[0]
+        label = 'activity_'+str(activity)
         activity_list.append('activity_'+str(activity))
 
         data = (open(txt_file, "r")).read().splitlines()
-        for doc in data:
-            tmp_list.extend(doc.split(' '))
 
-        sample_list.append(tmp_list)
+        while (start_ind + 100) < len(data):
 
-    for doc, label in zip(sample_list, activity_list):
-        train_doc, test_doc = train_test_split(
-            doc, test_size=0.25, random_state=1)
+            split_doc_list = []
+            end_ind = start_ind + 100
+            for doc in data[start_ind:end_ind]:
 
-        train_docs.append(train_doc)
-        test_docs.append(test_doc)
+                split_doc_list.extend(doc.split(' '))
+            train_doc, test_doc = train_test_split(
+                split_doc_list, test_size=0.25, random_state=1)
+            
+            train_docs.append(train_doc)
+            test_docs.append(test_doc)
 
-        train_doc_labels.append(label)
-        test_doc_labels.append(label)
+            #train_doc_labels.append(label)
+            test_doc_labels.append(label)
 
-    return train_docs, train_doc_labels
+            start_ind = end_ind
+            doc_count = doc_count + 1
+
+        activity_doc_count_index.append([label, doc_count])
+
+    return train_docs, activity_list, activity_doc_count_index
 
 
 def get_corpus(vocab, docs):
@@ -73,7 +82,7 @@ def filter_embeddings(vocab, embeddings, clustering_cnts):
 
 def get_cluster_embeddings(input_txt_filepath, embeddings_filepath, clustering_cnts):
 
-    samples, activities = load_data(input_txt_filepath)
+    samples, activities, activity_doc_count_index = load_data(input_txt_filepath)
 
     # total_words = []
     # for sample in samples:
@@ -94,7 +103,7 @@ def get_cluster_embeddings(input_txt_filepath, embeddings_filepath, clustering_c
     power = PowerTransformer(method='yeo-johnson', standardize=True)
     cluster_embeddings = power.fit_transform(cluster_embeddings)
 
-    return vocab, cluster_embeddings, corpus, activities
+    return vocab, cluster_embeddings, corpus, activities, activity_doc_count_index
 
 
 def get_test_documents():
