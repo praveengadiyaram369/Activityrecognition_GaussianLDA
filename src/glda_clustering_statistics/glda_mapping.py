@@ -43,15 +43,21 @@ def topic_doc_mapping(topic_doc_counts_df):
     return mapping_dict
 
 
-def get_activity_topic_mapping(activity_labels):
+def get_activity_topic_mapping(activity_labels, activity_doc_count_index):
 
     with open("saved_model/table_counts_per_doc.pkl", "rb") as doc:
         data = pickle.load(doc)
+    
+    activity_count = []
+
+    for activity in activity_labels:
+        temp = data[: , activity_doc_count_index[activity]]
+        activity_count.append(np.sum(temp, axis = 1).tolist())
 
     topic_index = ['Topic'+str(i) for i in list(range(len(activity_labels)))]
 
     topic_doc_counts_df = pd.DataFrame(
-        data, index=topic_index, columns=activity_labels)
+        activity_count, index=topic_index, columns=activity_labels)
     print(topic_doc_counts_df.T)
 
     fig, ax = plt.subplots()
@@ -74,6 +80,7 @@ def get_activity_topic_mapping(activity_labels):
                 'activity_topic_mapping.png', bbox_inches='tight')
 
     topic_doc_counts_df.drop(['aa'], axis=1, inplace=True)
+    activity_labels.pop(0)
     return topic_doc_mapping(topic_doc_counts_df)
 
 

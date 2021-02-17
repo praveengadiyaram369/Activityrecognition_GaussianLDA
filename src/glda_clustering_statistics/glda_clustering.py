@@ -3,7 +3,7 @@ import numpy as np
 from gaussianlda import GaussianLDAAliasTrainer
 from gaussianlda.model import GaussianLDA
 from collections import Counter
-
+from statistics import mode
 from embeddings_generator import get_cluster_embeddings, get_test_documents
 from glda_mapping import get_activity_topic_mapping
 
@@ -40,13 +40,14 @@ def print_testresults(test_results, classification_report_dict):
 if __name__ == "__main__":
 
     # _for documents
-    input_txt_filepath = os.getcwd() + f'/../../data/documents/*activity_subseq_101*.txt'
+    input_txt_filepath = os.getcwd(
+    ) + f'/../../data/documents/Different sensors/*activity_subseq*.txt'
 
     # _for cluster embeddings
     embeddings_filepath = os.getcwd(
     ) + f'/../../data/sub_sequence_output/word_embeddings_from_clusters.txt'
 
-    vocab, embeddings, corpus, activity_labels = get_cluster_embeddings(
+    vocab, embeddings, corpus, activity_labels, activity_doc_count_index = get_cluster_embeddings(
         input_txt_filepath, embeddings_filepath)
 
     num_topics = len(set(activity_labels))
@@ -54,19 +55,20 @@ if __name__ == "__main__":
 
     # Prepare a trainer
     trainer = GaussianLDAAliasTrainer(
-        corpus, embeddings, vocab, num_topics, 0.2, save_path=output_dir, show_topics=num_topics
+        corpus, embeddings, vocab, num_topics, 0.1, save_path=output_dir, show_topics=num_topics
     )
     # Set training running
-    trainer.sample(3)
+    trainer.sample(5)
 
-    activity_topic_mapping = get_activity_topic_mapping(activity_labels)
+    activity_topic_mapping = get_activity_topic_mapping(
+        list(set(activity_labels)), activity_doc_count_index)
 
     output_dir = "saved_model"
     model = GaussianLDA.load(output_dir)
 
     test_docs, test_doc_labels = get_test_documents()
 
-    iterations = 10
+    iterations = 20
 
     test_results = {}
 
@@ -77,9 +79,9 @@ if __name__ == "__main__":
         test_topics = model.sample(doc, iterations)
 
         true_doc_id = int((activity_topic_mapping[activity])[5:])
-        test_doc_true.extend([true_doc_id] * len(test_topics))
+        test_doc_true.append(true_doc_id)
 
-        test_doc_glda.extend(test_topics)
+        test_doc_glda.append(mode(test_topics))
         test_results[activity] = (Counter(test_topics), len(test_topics))
 
     classification_report_dict = classification_report(

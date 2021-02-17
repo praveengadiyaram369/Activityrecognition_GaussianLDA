@@ -143,3 +143,4 @@ src/glda_extrasensorydata/input/sensor_features_lstm_tuned.csv
 src/glda_extrasensorydata/logs/glda_testing_analysis.log
 src/glda_extrasensorydata/clustering_output/featues_from_clustering.txt
 src/glda_extrasensorydata/clustering_output/*activity_subseq*
+data/documents/Different sensors/
