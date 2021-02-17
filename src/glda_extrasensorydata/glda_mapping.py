@@ -49,13 +49,11 @@ def get_activity_topic_mapping(activity_labels, activity_doc_count_index):
         data = pickle.load(doc)
     
     activity_count = []
-    start_ind = 0
 
-    for activity in activity_doc_count_index:
+    for activity in activity_labels:
         
-        temp = data[: , list(range(start_ind, activity[1]))]
+        temp = data[: , activity_doc_count_index[activity]]
         activity_count.append(np.sum(temp, axis = 1).tolist())
-        start_ind = activity[1]
 
     topic_index = ['Topic'+str(i) for i in list(range(len(activity_labels)))]
 

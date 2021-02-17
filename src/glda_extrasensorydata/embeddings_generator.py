@@ -3,6 +3,7 @@ import os
 import glob
 import numpy as np
 
+from collections import defaultdict
 from sklearn.preprocessing import PowerTransformer
 from sklearn.model_selection import train_test_split
 
@@ -24,38 +25,38 @@ def load_data(input_txt_filepath):
     txt_files = glob.glob(input_txt_filepath)
 
     activity_list = []
-    activity_doc_count_index = []
-    doc_count = 0
+    activity_doc_count_index = defaultdict(list)
+    doc_count = -1
 
     for txt_file in txt_files:
-        start_ind = 0
+        
+        tmp_list = []
         activity = txt_file.split('/')[-1].split('_')[-1].split('.')[0]
         label = 'activity_'+str(activity)
         activity_list.append('activity_'+str(activity))
 
         data = (open(txt_file, "r")).read().splitlines()
 
-        while (start_ind + 100) < len(data):
+        for doc in data:
 
-            split_doc_list = []
-            end_ind = start_ind + 100
-            for doc in data[start_ind:end_ind]:
+            tmp_list.extend(doc.split(' '))
+        
+        train_doc, test_doc = train_test_split(
+            tmp_list, test_size=0.25, random_state=1)
+        
+        train_docs.append(train_doc)
+        test_docs.append(test_doc)
 
-                split_doc_list.extend(doc.split(' '))
-            train_doc, test_doc = train_test_split(
-                split_doc_list, test_size=0.25, random_state=1)
-            
-            train_docs.append(train_doc)
-            test_docs.append(test_doc)
+        #train_doc_labels.append(label)
+        test_doc_labels.append(label)
 
-            #train_doc_labels.append(label)
-            test_doc_labels.append(label)
+        doc_count = doc_count + 1
+        if label not in activity_doc_count_index:
+            activity_doc_count_index[label] = [doc_count]
+        else:
+            activity_doc_count_index[label].append(doc_count)
 
-            start_ind = end_ind
-            doc_count = doc_count + 1
-
-        activity_doc_count_index.append([label, doc_count])
-
+    #print(activity_doc_count_index)
     return train_docs, activity_list, activity_doc_count_index
 
 
