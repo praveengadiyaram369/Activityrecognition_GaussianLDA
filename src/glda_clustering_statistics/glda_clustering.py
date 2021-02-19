@@ -37,6 +37,12 @@ def print_testresults(test_results, classification_report_dict):
     #         print(f'Topic: {distribution[0]}  = {percentage}')
 
 
+def get_mode(test_topics):
+
+    counter = Counter(test_topics)
+    return counter.most_common()[0][0]
+
+
 if __name__ == "__main__":
 
     # _for documents
@@ -50,15 +56,15 @@ if __name__ == "__main__":
     vocab, embeddings, corpus, activity_labels, activity_doc_count_index = get_cluster_embeddings(
         input_txt_filepath, embeddings_filepath)
 
-    num_topics = len(set(activity_labels))
-    output_dir = "saved_model"
+    # num_topics = len(set(activity_labels))
+    # output_dir = "saved_model"
 
-    # Prepare a trainer
-    trainer = GaussianLDAAliasTrainer(
-        corpus, embeddings, vocab, num_topics, 0.1, save_path=output_dir, show_topics=num_topics
-    )
-    # Set training running
-    trainer.sample(5)
+    # # Prepare a trainer
+    # trainer = GaussianLDAAliasTrainer(
+    #     corpus, embeddings, vocab, num_topics, 0.1, save_path=output_dir, show_topics=num_topics
+    # )
+    # # Set training running
+    # trainer.sample(5)
 
     activity_topic_mapping = get_activity_topic_mapping(
         list(set(activity_labels)), activity_doc_count_index)
@@ -68,7 +74,7 @@ if __name__ == "__main__":
 
     test_docs, test_doc_labels = get_test_documents()
 
-    iterations = 20
+    iterations = 5
 
     test_results = {}
 
@@ -81,8 +87,12 @@ if __name__ == "__main__":
         true_doc_id = int((activity_topic_mapping[activity])[5:])
         test_doc_true.append(true_doc_id)
 
-        test_doc_glda.append(mode(test_topics))
+        test_doc_glda.append(get_mode(test_topics))
         test_results[activity] = (Counter(test_topics), len(test_topics))
+
+    print(test_doc_glda)
+    print()
+    print(test_doc_true)
 
     classification_report_dict = classification_report(
         test_doc_true, test_doc_glda, output_dict=True)
