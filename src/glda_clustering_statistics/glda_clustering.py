@@ -1,4 +1,5 @@
 import os
+import csv
 import numpy as np
 from gaussianlda import GaussianLDAAliasTrainer
 from gaussianlda.model import GaussianLDA
@@ -13,20 +14,21 @@ from sklearn.metrics.cluster import adjusted_rand_score
 
 def print_testresults(test_results, classification_report_dict):
 
-    accuracy = classification_report_dict['accuracy']
+    accuracy = classification_report_dict['accuracy']*100
     ari = classification_report_dict['adjusted_rand_index_score']
-    weighted_average_precision = classification_report_dict['weighted avg']['precision']
-    weighted_average_recall = classification_report_dict['weighted avg']['recall']
-    weighted_average_f1_score = classification_report_dict['weighted avg']['f1-score']
+    weighted_average_precision = classification_report_dict['weighted avg']['precision'] * 100
+    weighted_average_recall = classification_report_dict['weighted avg']['recall'] * 100
+    weighted_average_f1_score = classification_report_dict['weighted avg']['f1-score'] * 100
 
-    print(f'Accuracy {accuracy*100}')
-    print(f'Adjusted Rand Index Score {ari}')
-    print(
-        f'Weighted Average weighted_average_precision {weighted_average_precision*100}')
-    print(
-        f'Weighted Average weighted_average_recall {weighted_average_recall*100}')
-    print(
-        f'Weighted Average weighted_average_f1_score {weighted_average_f1_score*100}')
+    glda_output = [accuracy, ari,
+                   weighted_average_precision, weighted_average_recall, weighted_average_f1_score]
+
+    with open("output/glda_performance_data.csv", "a", newline='') as fp:
+        wr = csv.writer(fp, dialect='excel')
+        wr.writerow(glda_output)
+
+    logger.info(
+        f'Finished writing glda performance metrics to the output')
 
     # for key, val in test_results.items():
 
@@ -66,7 +68,7 @@ if __name__ == "__main__":
         corpus, embeddings, vocab, num_topics, 0.01, save_path=output_dir, show_topics=num_topics
     )
     # Set training running
-    trainer.sample(5)
+    trainer.sample(20)
 
     activity_topic_mapping = get_activity_topic_mapping(
         list(set(activity_labels)), activity_doc_count_index)
@@ -76,7 +78,7 @@ if __name__ == "__main__":
 
     test_docs, test_doc_labels = get_test_documents()
 
-    iterations = 10
+    iterations = 20
 
     test_results = {}
 
@@ -91,10 +93,6 @@ if __name__ == "__main__":
 
         test_doc_glda.append(get_mode(test_topics))
         test_results[activity] = (Counter(test_topics), len(test_topics))
-
-    print(test_doc_glda)
-    print()
-    print(test_doc_true)
 
     classification_report_dict = classification_report(
         test_doc_true, test_doc_glda, output_dict=True)

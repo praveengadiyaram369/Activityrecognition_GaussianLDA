@@ -6,6 +6,17 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
+def transform_data(data):
+
+    data = np.transpose(data)
+    one_hotencoded_data = np.zeros(data.shape, dtype='int32')
+    for idx in range(data.shape[0]):
+        max_idx = np.argmax(data[idx])
+        one_hotencoded_data[idx][max_idx] = 1
+
+    return np.transpose(one_hotencoded_data)
+
+
 def topic_doc_mapping(topic_doc_counts_df):
 
     mapping_dict = {}
@@ -47,14 +58,17 @@ def get_activity_topic_mapping(activity_labels, activity_doc_count_index):
 
     with open("saved_model/table_counts_per_doc.pkl", "rb") as doc:
         data = pickle.load(doc)
-    
+
     activity_count = []
+    data = transform_data(data)
 
     for activity in activity_labels:
-        temp = data[: , activity_doc_count_index[activity]]
-        activity_count.append(np.sum(temp, axis = 1).tolist())
+        temp = data[:, activity_doc_count_index[activity]]
+        activity_count.append(np.sum(temp, axis=1).tolist())
 
-    topic_index = ['Topic'+str(i) for i in list(range(len(activity_labels)))]
+    activity_count = np.transpose(np.asarray(activity_count))
+
+    topic_index = ['Topic'+str(i) for i in range(len(activity_labels))]
 
     topic_doc_counts_df = pd.DataFrame(
         activity_count, index=topic_index, columns=activity_labels)

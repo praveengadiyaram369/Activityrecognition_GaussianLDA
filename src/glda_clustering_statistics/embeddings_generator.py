@@ -3,7 +3,7 @@ import os
 import glob
 import numpy as np
 
-from collections import defaultdict
+from collections import defaultdict, Counter
 from sklearn.model_selection import train_test_split
 
 train_docs = []
@@ -51,10 +51,10 @@ def load_data(input_txt_filepath, train_or_test_flag=True):
                 activity_doc_count_index[label].append(doc_count)
 
             train_docs.append(tmp_list)
-            train_doc_labels.append('activity_'+str(activity))
+            train_doc_labels.append(label)
         else:
             test_docs.append(tmp_list)
-            test_doc_labels.append('activity_'+str(activity))
+            test_doc_labels.append(label)
 
     if train_or_test_flag == False:
         return None
