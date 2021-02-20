@@ -46,25 +46,27 @@ def get_mode(test_topics):
 if __name__ == "__main__":
 
     # _for documents
-    input_txt_filepath = os.getcwd(
-    ) + f'/../../data/documents/Different sensors/*activity_subseq*.txt'
+    input_txt_filepath_train = os.getcwd(
+    ) + f'/../../data/documents/train/*activity_subseq*.txt'
+    input_txt_filepath_test = os.getcwd(
+    ) + f'/../../data/documents/test/*activity_subseq*.txt'
 
     # _for cluster embeddings
     embeddings_filepath = os.getcwd(
     ) + f'/../../data/sub_sequence_output/word_embeddings_from_clusters.txt'
 
     vocab, embeddings, corpus, activity_labels, activity_doc_count_index = get_cluster_embeddings(
-        input_txt_filepath, embeddings_filepath)
+        input_txt_filepath_train, input_txt_filepath_test, embeddings_filepath)
 
-    # num_topics = len(set(activity_labels))
-    # output_dir = "saved_model"
+    num_topics = len(set(activity_labels))
+    output_dir = "saved_model"
 
-    # # Prepare a trainer
-    # trainer = GaussianLDAAliasTrainer(
-    #     corpus, embeddings, vocab, num_topics, 0.1, save_path=output_dir, show_topics=num_topics
-    # )
-    # # Set training running
-    # trainer.sample(5)
+    # Prepare a trainer
+    trainer = GaussianLDAAliasTrainer(
+        corpus, embeddings, vocab, num_topics, 0.01, save_path=output_dir, show_topics=num_topics
+    )
+    # Set training running
+    trainer.sample(5)
 
     activity_topic_mapping = get_activity_topic_mapping(
         list(set(activity_labels)), activity_doc_count_index)
@@ -74,7 +76,7 @@ if __name__ == "__main__":
 
     test_docs, test_doc_labels = get_test_documents()
 
-    iterations = 5
+    iterations = 10
 
     test_results = {}
 

@@ -145,3 +145,5 @@ src/glda_extrasensorydata/clustering_output/featues_from_clustering.txt
 src/glda_extrasensorydata/clustering_output/*activity_subseq*
 data/documents/Different sensors/
 data/UCI HAR Dataset
+data/documents/train
+data/documents/test
