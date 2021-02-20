@@ -27,9 +27,6 @@ def print_testresults(test_results, classification_report_dict):
         wr = csv.writer(fp, dialect='excel')
         wr.writerow(glda_output)
 
-    logger.info(
-        f'Finished writing glda performance metrics to the output')
-
     # for key, val in test_results.items():
 
     #     print(f'----------- {key} --------------')
@@ -78,7 +75,7 @@ if __name__ == "__main__":
 
     test_docs, test_doc_labels = get_test_documents()
 
-    iterations = 20
+    iterations = 100
 
     test_results = {}
 
