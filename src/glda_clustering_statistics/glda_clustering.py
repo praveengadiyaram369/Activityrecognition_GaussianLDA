@@ -10,7 +10,7 @@ from glda_mapping import get_activity_topic_mapping
 
 from sklearn.metrics import classification_report
 from sklearn.metrics.cluster import adjusted_rand_score
-
+from tqdm import tqdm
 
 def print_testresults(test_results, classification_report_dict):
 
@@ -62,27 +62,26 @@ if __name__ == "__main__":
 
     # Prepare a trainer
     trainer = GaussianLDAAliasTrainer(
-        corpus, embeddings, vocab, num_topics, 0.01, save_path=output_dir, show_topics=num_topics
+        corpus, embeddings, vocab, num_topics, 0.01, save_path=output_dir, kappa=0.5
     )
     # Set training running
-    trainer.sample(20)
+    trainer.sample(3)
 
     activity_topic_mapping = get_activity_topic_mapping(
         list(set(activity_labels)), activity_doc_count_index)
 
-    output_dir = "saved_model"
     model = GaussianLDA.load(output_dir)
 
     test_docs, test_doc_labels = get_test_documents()
 
-    iterations = 100
+    iterations = 10
 
     test_results = {}
 
     test_doc_true = []
     test_doc_glda = []
 
-    for doc, activity in zip(test_docs, test_doc_labels):
+    for doc, activity in tqdm(zip(test_docs, test_doc_labels)):
         test_topics = model.sample(doc, iterations)
 
         true_doc_id = int((activity_topic_mapping[activity])[5:])
