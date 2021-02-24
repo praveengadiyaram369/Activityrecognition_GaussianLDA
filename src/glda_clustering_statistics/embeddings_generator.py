@@ -47,7 +47,7 @@ def filter_documents(stop_words, train_or_test_flag):
     docs_updated = [list(filter(lambda x:x not in stop_words, doc)) for doc in docs]    
     return docs_updated
 
-def get_stop_words():
+def get_stop_words(idf_threshold):
 
     dictionary = corpora.Dictionary(train_docs)
 
@@ -64,7 +64,6 @@ def get_stop_words():
 
     plot_idfdata(tfidf_dict.values())
 
-    idf_threshold = 0.2
     stop_words = []
     tfidf_dict_sorted = sorted(tfidf_dict.items(), key=lambda x: x[1])
 
@@ -150,8 +149,9 @@ def get_embeddings(embeddings_filepath):
     return cluster_embeddings
 
 
-def get_cluster_embeddings(input_txt_filepath_train, input_txt_filepath_test, embeddings_filepath):
+def get_cluster_embeddings(input_txt_filepath_train, input_txt_filepath_test, embeddings_filepath, threshold):
 
+    reset_global_data()
     activities, activity_doc_count_index = load_data(
         input_txt_filepath_train, train_or_test_flag=True)
     load_data(input_txt_filepath_test, train_or_test_flag=False)
@@ -163,9 +163,8 @@ def get_cluster_embeddings(input_txt_filepath_train, input_txt_filepath_test, em
 
     assert len(vocab) == len(cluster_embeddings)
 
-    stop_words = get_stop_words()
+    stop_words = get_stop_words(threshold)
     np.savetxt('output/stopwords.txt', np.array(stop_words), delimiter=',', fmt='%5s')
-    print(f'No. of Stop words: {len(stop_words)} \n')
 
     vocab, cluster_embeddings = filter_embeddings(
         vocab, cluster_embeddings, stop_words)
@@ -185,3 +184,15 @@ def get_cluster_embeddings(input_txt_filepath_train, input_txt_filepath_test, em
 
 def get_test_documents():
     return test_docs, test_doc_labels
+
+def reset_global_data():
+
+    global train_docs
+    global train_doc_labels
+    global test_docs
+    global test_doc_labels
+
+    train_docs = []
+    train_doc_labels = []
+    test_docs = []
+    test_doc_labels = []
