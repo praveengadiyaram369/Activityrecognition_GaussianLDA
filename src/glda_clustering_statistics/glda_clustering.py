@@ -62,10 +62,10 @@ if __name__ == "__main__":
 
     # Prepare a trainer
     trainer = GaussianLDAAliasTrainer(
-        corpus, embeddings, vocab, num_topics, 0.01, save_path=output_dir, kappa=0.5
+        corpus, embeddings, vocab, num_topics, 0.01, save_path=output_dir, kappa=0.1
     )
     # Set training running
-    trainer.sample(3)
+    trainer.sample(5)
 
     activity_topic_mapping = get_activity_topic_mapping(
         list(set(activity_labels)), activity_doc_count_index)
@@ -74,7 +74,7 @@ if __name__ == "__main__":
 
     test_docs, test_doc_labels = get_test_documents()
 
-    iterations = 10
+    iterations = 30
 
     test_results = {}
 

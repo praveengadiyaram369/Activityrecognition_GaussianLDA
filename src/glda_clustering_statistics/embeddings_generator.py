@@ -35,7 +35,7 @@ def filter_embeddings(vocab, embeddings, stop_words):
             final_vocab.append(word)
             final_embeddings.append(embeddings[idx])
 
-    return np.array(final_vocab), np.array(final_embeddings)
+    return final_vocab, np.array(final_embeddings)
 
 def filter_documents(stop_words, train_or_test_flag):
 
@@ -170,7 +170,7 @@ def get_cluster_embeddings(input_txt_filepath_train, input_txt_filepath_test, em
     vocab, cluster_embeddings = filter_embeddings(
         vocab, cluster_embeddings, stop_words)
 
-    assert vocab.shape[0] == cluster_embeddings.shape[0]
+    assert len(vocab) == cluster_embeddings.shape[0]
 
     global train_docs
     global test_docs
