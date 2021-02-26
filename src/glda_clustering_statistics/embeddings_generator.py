@@ -17,12 +17,12 @@ test_doc_labels = []
 
 def plot_idfdata(tfidf_values):
 
-    x = range(len(tfidf_values))
-    y = sorted(tfidf_values, reverse=True)
+    y = range(len(tfidf_values))
+    x = sorted(tfidf_values, reverse=True)
 
     plt.scatter(x, y, marker='.')
-    plt.xlabel('words')
-    plt.ylabel('tf-idf values')
+    plt.ylabel('words')
+    plt.xlabel('tf-idf values')
     plt.savefig('output/tfidf_plot.png', bbox_inches='tight')
 
 
@@ -37,15 +37,40 @@ def filter_embeddings(vocab, embeddings, stop_words):
 
     return final_vocab, np.array(final_embeddings)
 
-def filter_documents(stop_words, train_or_test_flag):
+def filter_documents(stop_words):
 
-    if train_or_test_flag == True:
-        docs = train_docs
-    else:
-        docs = test_docs
+    global train_docs
+    global test_docs
 
-    docs_updated = [list(filter(lambda x:x not in stop_words, doc)) for doc in docs]    
-    return docs_updated
+    train_docs = [list(filter(lambda x:x not in stop_words, doc)) for doc in train_docs]    
+    test_docs = [list(filter(lambda x:x not in stop_words, doc)) for doc in train_docs]    
+
+
+def update_documents(new_vocab):
+
+    global train_docs
+    global test_docs
+
+    new_vocab = [(word.split('+')[0], word.split('+')[1]) for word in new_vocab]
+
+    for idx in range(len(train_docs)):
+        new_words = []
+        for word in new_vocab:
+            if word[0] in train_docs[idx] and word[1] in train_docs[idx]:
+                new_words.append(f'{word[0]}+{word[1]}')
+
+        if len(new_words) > 0:
+            train_docs[idx].extend(new_words)
+
+    for idx in range(len(test_docs)):
+        new_words = []
+        for word in new_vocab:
+            if word[0] in test_docs[idx] and word[1] in test_docs[idx]:
+                new_words.append(f'{word[0]}+{word[1]}')
+
+        if len(new_words) > 0:
+            test_docs[idx].extend(new_words)
+
 
 def get_stop_words(idf_threshold):
 
@@ -73,8 +98,43 @@ def get_stop_words(idf_threshold):
         else:
             break
 
-    return stop_words
+    print(f'No. of stopwords removed: {len(stop_words)}')    
+    
+    return stop_words, tfidf_dict_sorted
 
+def get_euclidean_distance_similarity(vec1, vec2):
+    return 1 - np.linalg.norm(vec1-vec2)
+
+def get_new_featurevector(vec1, vec2):
+    return (vec1 + vec2)/2
+
+
+def get_new_vocabulary(vocab, cluster_embeddings, tfidf_dict_sorted, idf_threshold=0.3):
+
+    word_dictionary = {}
+    for key, val in zip(vocab, cluster_embeddings):
+        word_dictionary[key] = val
+
+    top_words = []
+    for word in tfidf_dict_sorted:
+        if word[1] > idf_threshold:
+            top_words.append(word[0])
+    
+    new_vocabulary_dict = {}
+    for val1 in range(len(top_words)):
+        vec1 = top_words[val1]
+        for val2 in range(val1):
+            if val1 != val2:
+                vec2 = top_words[val2]
+
+                similarity = get_euclidean_distance_similarity(word_dictionary[vec1], word_dictionary[vec2])
+                if similarity > 0:
+                    new_vocab = f'{vec1}+{vec2}'
+                    new_vocabulary_dict[new_vocab] = get_new_featurevector(word_dictionary[vec1], word_dictionary[vec2])
+
+    print(f'No. of new vocab created: {len(new_vocabulary_dict)}')    
+
+    return new_vocabulary_dict
 
 def generate_cluster_names(sequence_names, cluster_cnt=100):
 
@@ -92,7 +152,6 @@ def load_data(input_txt_filepath, train_or_test_flag=True):
     # _get all txt files inside file_path
     txt_files = glob.glob(input_txt_filepath)
 
-    train_doc_labels = []
     activity_doc_count_index = defaultdict(list)
     doc_count = -1
 
@@ -107,8 +166,6 @@ def load_data(input_txt_filepath, train_or_test_flag=True):
             tmp_list.extend(doc.split(' '))
 
         if train_or_test_flag:
-            # if len(activity_doc_count_index[label]) > 400:
-            #     continue
 
             doc_count += 1
             if label not in activity_doc_count_index:
@@ -125,7 +182,7 @@ def load_data(input_txt_filepath, train_or_test_flag=True):
     if train_or_test_flag == False:
         return None
 
-    return train_doc_labels, activity_doc_count_index
+    return activity_doc_count_index
 
 
 def get_corpus(vocab):
@@ -149,10 +206,11 @@ def get_embeddings(embeddings_filepath):
     return cluster_embeddings
 
 
-def get_cluster_embeddings(input_txt_filepath_train, input_txt_filepath_test, embeddings_filepath, threshold):
+def get_cluster_embeddings(input_txt_filepath_train, input_txt_filepath_test, embeddings_filepath):
 
     reset_global_data()
-    activities, activity_doc_count_index = load_data(
+    stop_words_new_vocab_flag = True
+    activity_doc_count_index = load_data(
         input_txt_filepath_train, train_or_test_flag=True)
     load_data(input_txt_filepath_test, train_or_test_flag=False)
 
@@ -163,23 +221,29 @@ def get_cluster_embeddings(input_txt_filepath_train, input_txt_filepath_test, em
 
     assert len(vocab) == len(cluster_embeddings)
 
-    stop_words = get_stop_words(threshold)
-    np.savetxt('output/stopwords.txt', np.array(stop_words), delimiter=',', fmt='%5s')
+    if stop_words_new_vocab_flag == True:
 
-    vocab, cluster_embeddings = filter_embeddings(
-        vocab, cluster_embeddings, stop_words)
+        stop_words, tfidf_dict_sorted = get_stop_words(idf_threshold=0.2)
 
-    assert len(vocab) == cluster_embeddings.shape[0]
+        vocab, cluster_embeddings = filter_embeddings(
+            vocab, cluster_embeddings, stop_words)
 
-    global train_docs
-    global test_docs
+        assert len(vocab) == cluster_embeddings.shape[0]
 
-    train_docs = filter_documents(stop_words, 
-        train_or_test_flag=True)
-    test_docs = filter_documents(stop_words, train_or_test_flag=False)
+        filter_documents(stop_words)
+
+        new_vocabulary_dict = get_new_vocabulary(vocab, cluster_embeddings, tfidf_dict_sorted, idf_threshold=0.33)
+        for new_vocab, feature in new_vocabulary_dict.items():
+            vocab.append(new_vocab)
+            cluster_embeddings = np.vstack([cluster_embeddings, feature])
+
+        assert len(vocab) == cluster_embeddings.shape[0]
+
+        update_documents(list(new_vocabulary_dict.keys()))
+
     corpus = get_corpus(vocab)
 
-    return vocab, cluster_embeddings, corpus, activities, activity_doc_count_index
+    return vocab, cluster_embeddings, corpus, train_doc_labels, activity_doc_count_index
 
 
 def get_test_documents():

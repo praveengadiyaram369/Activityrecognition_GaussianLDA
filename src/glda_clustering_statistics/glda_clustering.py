@@ -13,7 +13,7 @@ from sklearn.metrics.cluster import adjusted_rand_score
 from tqdm import tqdm
 
 
-def print_testresults(test_results, classification_report_dict, alpha, threshold):
+def print_testresults(test_results, classification_report_dict):
 
     accuracy = classification_report_dict['accuracy']*100
     ari = classification_report_dict['adjusted_rand_index_score']
@@ -21,7 +21,7 @@ def print_testresults(test_results, classification_report_dict, alpha, threshold
     weighted_average_recall = classification_report_dict['weighted avg']['recall'] * 100
     weighted_average_f1_score = classification_report_dict['weighted avg']['f1-score'] * 100
 
-    glda_output = [alpha, threshold, accuracy, ari,
+    glda_output = [accuracy, ari,
                    weighted_average_precision, weighted_average_recall, weighted_average_f1_score]
 
     with open("output/glda_performance_data.csv", "a", newline='') as fp:
@@ -55,51 +55,59 @@ if __name__ == "__main__":
     embeddings_filepath = os.getcwd(
     ) + f'/../../data/sub_sequence_output/word_embeddings_from_clusters.txt'
 
-    #tfidf_threshold_values = np.arange(0.17, 0.23, 0.02).tolist()
-    tfidf_threshold_values = [0.2]
-    for threshold in tfidf_threshold_values:
+    output_dir = "saved_model"
+    alpha = 0.01
 
-        vocab, embeddings, corpus, activity_labels, activity_doc_count_index = get_cluster_embeddings(
-            input_txt_filepath_train, input_txt_filepath_test, embeddings_filepath, threshold)
+    vocab, embeddings, corpus, activity_labels, activity_doc_count_index = get_cluster_embeddings(
+        input_txt_filepath_train, input_txt_filepath_test, embeddings_filepath)
 
-        num_topics = len(set(activity_labels))
-        output_dir = "saved_model"
-        alpha = 0.01
+    D = len(corpus)
+    N = sum([len(val) for val in corpus])
+    V = len(vocab)
+    B = int(N/D)
 
-        # Prepare a trainer
-        trainer = GaussianLDAAliasTrainer(
-            corpus, embeddings, vocab, num_topics, alpha, save_path=output_dir, kappa=0.4
-        )
-        # Set training running
-        trainer.sample(10)
+    print(f'Total documents, D: {D}')
+    print(f'Total No. of Words, N: {N}')
+    print(f'Total Vocabulary, V: {V}')
+    print(f'Average No. of words per documents, B: {B}')
 
-        activity_topic_mapping = get_activity_topic_mapping(
-            list(set(activity_labels)), activity_doc_count_index)
 
-        model = GaussianLDA.load(output_dir)
+    num_topics = len(set(activity_labels))
 
-        test_docs, test_doc_labels = get_test_documents()
+    # Prepare a trainer
+    trainer = GaussianLDAAliasTrainer(
+        corpus, embeddings, vocab, num_topics, alpha, save_path=output_dir, kappa=0.3
+    )
+    # Set training running
+    trainer.sample(10)
 
-        iterations = 30
+    activity_topic_mapping = get_activity_topic_mapping(
+        list(set(activity_labels)), activity_doc_count_index)
 
-        test_results = {}
+    model = GaussianLDA.load(output_dir)
 
-        test_doc_true = []
-        test_doc_glda = []
+    test_docs, test_doc_labels = get_test_documents()
 
-        for doc, activity in tqdm(zip(test_docs, test_doc_labels)):
-            test_topics = model.sample(doc, iterations)
+    iterations = 25
 
-            true_doc_id = int((activity_topic_mapping[activity])[5:])
-            test_doc_true.append(true_doc_id)
+    test_results = {}
 
-            test_doc_glda.append(get_mode(test_topics))
-            test_results[activity] = (Counter(test_topics), len(test_topics))
+    test_doc_true = []
+    test_doc_glda = []
 
-        classification_report_dict = classification_report(
-            test_doc_true, test_doc_glda, output_dict=True)
-        classification_report_dict['adjusted_rand_index_score'] = adjusted_rand_score(
-            test_doc_true, test_doc_glda)
+    for doc, activity in tqdm(zip(test_docs, test_doc_labels)):
+        test_topics = model.sample(doc, iterations)
 
-        print_testresults(
-            test_results, classification_report_dict, alpha, threshold)
+        true_doc_id = int((activity_topic_mapping[activity])[5:])
+        test_doc_true.append(true_doc_id)
+
+        test_doc_glda.append(get_mode(test_topics))
+        test_results[activity] = (Counter(test_topics), len(test_topics))
+
+    classification_report_dict = classification_report(
+        test_doc_true, test_doc_glda, output_dict=True)
+    classification_report_dict['adjusted_rand_index_score'] = adjusted_rand_score(
+        test_doc_true, test_doc_glda)
+
+    print_testresults(
+        test_results, classification_report_dict)
