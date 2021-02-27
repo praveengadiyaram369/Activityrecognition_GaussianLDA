@@ -37,13 +37,19 @@ def filter_embeddings(vocab, embeddings, stop_words):
 
     return final_vocab, np.array(final_embeddings)
 
+
 def filter_documents(stop_words):
 
     global train_docs
     global test_docs
 
-    train_docs = [list(filter(lambda x:x not in stop_words, doc)) for doc in train_docs]    
-    test_docs = [list(filter(lambda x:x not in stop_words, doc)) for doc in train_docs]    
+    for idx in range(len(train_docs)):
+        train_docs[idx] = list(
+            filter(lambda x: x not in stop_words, train_docs[idx]))
+
+    for idx in range(len(test_docs)):
+        test_docs[idx] = list(
+            filter(lambda x: x not in stop_words, test_docs[idx]))
 
 
 def update_documents(new_vocab):
@@ -51,7 +57,8 @@ def update_documents(new_vocab):
     global train_docs
     global test_docs
 
-    new_vocab = [(word.split('+')[0], word.split('+')[1]) for word in new_vocab]
+    new_vocab = [(word.split('+')[0], word.split('+')[1])
+                 for word in new_vocab]
 
     for idx in range(len(train_docs)):
         new_words = []
@@ -98,12 +105,14 @@ def get_stop_words(idf_threshold):
         else:
             break
 
-    print(f'No. of stopwords removed: {len(stop_words)}')    
-    
+    print(f'No. of stopwords removed: {len(stop_words)}')
+
     return stop_words, tfidf_dict_sorted
+
 
 def get_euclidean_distance_similarity(vec1, vec2):
     return 1 - np.linalg.norm(vec1-vec2)
+
 
 def get_new_featurevector(vec1, vec2):
     return (vec1 + vec2)/2
@@ -119,7 +128,7 @@ def get_new_vocabulary(vocab, cluster_embeddings, tfidf_dict_sorted, idf_thresho
     for word in tfidf_dict_sorted:
         if word[1] > idf_threshold:
             top_words.append(word[0])
-    
+
     new_vocabulary_dict = {}
     for val1 in range(len(top_words)):
         vec1 = top_words[val1]
@@ -127,14 +136,17 @@ def get_new_vocabulary(vocab, cluster_embeddings, tfidf_dict_sorted, idf_thresho
             if val1 != val2:
                 vec2 = top_words[val2]
 
-                similarity = get_euclidean_distance_similarity(word_dictionary[vec1], word_dictionary[vec2])
+                similarity = get_euclidean_distance_similarity(
+                    word_dictionary[vec1], word_dictionary[vec2])
                 if similarity > 0:
                     new_vocab = f'{vec1}+{vec2}'
-                    new_vocabulary_dict[new_vocab] = get_new_featurevector(word_dictionary[vec1], word_dictionary[vec2])
+                    new_vocabulary_dict[new_vocab] = get_new_featurevector(
+                        word_dictionary[vec1], word_dictionary[vec2])
 
-    print(f'No. of new vocab created: {len(new_vocabulary_dict)}')    
+    print(f'No. of new vocab created: {len(new_vocabulary_dict)}')
 
     return new_vocabulary_dict
+
 
 def generate_cluster_names(sequence_names, cluster_cnt=100):
 
@@ -199,6 +211,7 @@ def get_embeddings(embeddings_filepath):
     embeddings = [emb.split(',') for emb in data]
 
     cluster_embeddings = np.array(embeddings)
+    # cluster_embeddings = cluster_embeddings[:, [0, 1]]
     cluster_embeddings[cluster_embeddings == ''] = '0.0'
     cluster_embeddings = cluster_embeddings.astype(np.float)
     cluster_embeddings = Normalizer().fit_transform(cluster_embeddings)
@@ -223,7 +236,7 @@ def get_cluster_embeddings(input_txt_filepath_train, input_txt_filepath_test, em
 
     if stop_words_new_vocab_flag == True:
 
-        stop_words, tfidf_dict_sorted = get_stop_words(idf_threshold=0.2)
+        stop_words, tfidf_dict_sorted = get_stop_words(idf_threshold=0.15)
 
         vocab, cluster_embeddings = filter_embeddings(
             vocab, cluster_embeddings, stop_words)
@@ -232,7 +245,8 @@ def get_cluster_embeddings(input_txt_filepath_train, input_txt_filepath_test, em
 
         filter_documents(stop_words)
 
-        new_vocabulary_dict = get_new_vocabulary(vocab, cluster_embeddings, tfidf_dict_sorted, idf_threshold=0.33)
+        new_vocabulary_dict = get_new_vocabulary(
+            vocab, cluster_embeddings, tfidf_dict_sorted, idf_threshold=0.26)
         for new_vocab, feature in new_vocabulary_dict.items():
             vocab.append(new_vocab)
             cluster_embeddings = np.vstack([cluster_embeddings, feature])
@@ -248,6 +262,7 @@ def get_cluster_embeddings(input_txt_filepath_train, input_txt_filepath_test, em
 
 def get_test_documents():
     return test_docs, test_doc_labels
+
 
 def reset_global_data():
 
