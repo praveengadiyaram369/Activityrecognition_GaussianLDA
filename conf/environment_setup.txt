@@ -14,3 +14,4 @@
 14) pipenv install umap-learn
 15) pipenv install tensorflow==2.2.0
 16) pipenv install keras-tuner
+17) pipenv install tqdm

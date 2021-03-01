@@ -22,6 +22,7 @@ statistics = "*"
 umap-learn = "*"
 tensorflow = "==2.2.0"
 keras-tuner = "*"
+tqdm = "*"
 
 [requires]
 python_version = "3.7"

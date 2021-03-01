@@ -10,6 +10,7 @@ from glda_mapping import get_activity_topic_mapping
 
 from sklearn.metrics import classification_report
 from sklearn.metrics.cluster import adjusted_rand_score
+from tqdm import tqdm
 
 
 def print_testresults(test_results, classification_report_dict):
@@ -54,35 +55,47 @@ if __name__ == "__main__":
     embeddings_filepath = os.getcwd(
     ) + f'/../../data/sub_sequence_output/word_embeddings_from_clusters.txt'
 
+    output_dir = "saved_model"
+    alpha = 0.01
+
     vocab, embeddings, corpus, activity_labels, activity_doc_count_index = get_cluster_embeddings(
         input_txt_filepath_train, input_txt_filepath_test, embeddings_filepath)
 
+    D = len(corpus)
+    N = sum([len(val) for val in corpus])
+    V = len(vocab)
+    B = int(N/D)
+
+    print(f'Total documents, D: {D}')
+    print(f'Total No. of Words, N: {N}')
+    print(f'Total Vocabulary, V: {V}')
+    print(f'Average No. of words per documents, B: {B}')
+
+
     num_topics = len(set(activity_labels))
-    output_dir = "saved_model"
 
     # Prepare a trainer
     trainer = GaussianLDAAliasTrainer(
-        corpus, embeddings, vocab, num_topics, 0.01, save_path=output_dir, show_topics=num_topics
+        corpus, embeddings, vocab, num_topics, alpha, save_path=output_dir, kappa=0.3
     )
     # Set training running
-    trainer.sample(20)
+    trainer.sample(10)
 
     activity_topic_mapping = get_activity_topic_mapping(
         list(set(activity_labels)), activity_doc_count_index)
 
-    output_dir = "saved_model"
     model = GaussianLDA.load(output_dir)
 
     test_docs, test_doc_labels = get_test_documents()
 
-    iterations = 100
+    iterations = 25
 
     test_results = {}
 
     test_doc_true = []
     test_doc_glda = []
 
-    for doc, activity in zip(test_docs, test_doc_labels):
+    for doc, activity in tqdm(zip(test_docs, test_doc_labels)):
         test_topics = model.sample(doc, iterations)
 
         true_doc_id = int((activity_topic_mapping[activity])[5:])
@@ -96,4 +109,5 @@ if __name__ == "__main__":
     classification_report_dict['adjusted_rand_index_score'] = adjusted_rand_score(
         test_doc_true, test_doc_glda)
 
-    print_testresults(test_results, classification_report_dict)
+    print_testresults(
+        test_results, classification_report_dict)
