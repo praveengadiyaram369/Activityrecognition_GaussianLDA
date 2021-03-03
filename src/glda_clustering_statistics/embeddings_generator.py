@@ -2,6 +2,7 @@
 import os
 import glob
 import numpy as np
+import pickle
 
 from collections import defaultdict, Counter
 from sklearn.model_selection import train_test_split
@@ -13,6 +14,9 @@ train_docs = []
 train_doc_labels = []
 test_docs = []
 test_doc_labels = []
+cluster_cnt = 250
+sequence_names = ['X1', 'Y1', 'Z1', 'X2', 'Y2', 'Z2']
+clusters_channelwise = []
 
 
 def plot_idfdata(tfidf_values):
@@ -79,6 +83,16 @@ def update_documents(new_vocab):
             test_docs[idx].extend(new_words)
 
 
+def get_stop_words_fromfile():
+
+    with open(os.getcwd() + f'/../../data/stopwords.pkl', "rb") as doc:
+        stop_words = pickle.load(doc)
+
+    print(f'No. of stopwords removed: {len(stop_words)}')
+
+    return stop_words
+
+
 def get_stop_words(idf_threshold):
 
     dictionary = corpora.Dictionary(train_docs)
@@ -118,6 +132,45 @@ def get_new_featurevector(vec1, vec2):
     return (vec1 + vec2)/2
 
 
+def get_new_vocabulary_from_channels(vocab, cluster_embeddings):
+
+    word_dictionary = {}
+    for key, val in zip(vocab, cluster_embeddings):
+        word_dictionary[key] = val
+
+    combination_pairs = [('X1', 'Y2'), ('X1', 'Z2'),
+                         ('Y1', 'X2'), ('Y1', 'Z2'), ('Z1', 'X2'), ('Z1', 'Y2')]
+
+    new_vocabulary_dict = {}
+    for pair in combination_pairs:
+
+        channel_1_clusters = clusters_channelwise[sequence_names.index(
+            pair[0])]
+        channel_2_clusters = clusters_channelwise[sequence_names.index(
+            pair[0])]
+
+        for val1 in range(len(channel_1_clusters)):
+
+            if channel_1_clusters[val1] in word_dictionary.keys():
+                vec1 = channel_1_clusters[val1]
+
+                for val2 in range(val1):
+
+                    if channel_2_clusters[val2] in word_dictionary.keys():
+                        vec2 = channel_2_clusters[val2]
+
+                        similarity = get_euclidean_distance_similarity(
+                            word_dictionary[vec1], word_dictionary[vec2])
+                        if similarity > 0.7:
+                            new_vocab = f'{vec1}+{vec2}'
+                            new_vocabulary_dict[new_vocab] = get_new_featurevector(
+                                word_dictionary[vec1], word_dictionary[vec2])
+
+        print(f'No. of new vocab created: {len(new_vocabulary_dict)}')
+
+        return new_vocabulary_dict
+
+
 def get_new_vocabulary(vocab, cluster_embeddings, tfidf_dict_sorted, idf_threshold=0.3):
 
     word_dictionary = {}
@@ -148,13 +201,15 @@ def get_new_vocabulary(vocab, cluster_embeddings, tfidf_dict_sorted, idf_thresho
     return new_vocabulary_dict
 
 
-def generate_cluster_names(sequence_names, cluster_cnt=100):
+def generate_cluster_names():
 
     vocab = []
+    global clusters_channelwise
 
     for seq in sequence_names:
-        prefix = seq
-        vocab.extend([prefix+'_'+str(i) for i in range(cluster_cnt)])
+        cluster_names = [seq+'_'+str(i) for i in range(cluster_cnt)]
+        clusters_channelwise.append(cluster_names)
+        vocab.extend(cluster_names)
 
     return vocab
 
@@ -227,16 +282,15 @@ def get_cluster_embeddings(input_txt_filepath_train, input_txt_filepath_test, em
         input_txt_filepath_train, train_or_test_flag=True)
     load_data(input_txt_filepath_test, train_or_test_flag=False)
 
-    cluster_cnt = 250
-    sequence_names = ['X1', 'Y1', 'Z1', 'X2', 'Y2', 'Z2']
-    vocab = generate_cluster_names(sequence_names, cluster_cnt)
+    vocab = generate_cluster_names()
     cluster_embeddings = get_embeddings(embeddings_filepath)
 
     assert len(vocab) == len(cluster_embeddings)
 
     if stop_words_new_vocab_flag == True:
 
-        stop_words, tfidf_dict_sorted = get_stop_words(idf_threshold=0.15)
+        # stop_words, tfidf_dict_sorted = get_stop_words(idf_threshold=0.15)
+        stop_words = get_stop_words_fromfile()
 
         vocab, cluster_embeddings = filter_embeddings(
             vocab, cluster_embeddings, stop_words)
@@ -245,8 +299,12 @@ def get_cluster_embeddings(input_txt_filepath_train, input_txt_filepath_test, em
 
         filter_documents(stop_words)
 
-        new_vocabulary_dict = get_new_vocabulary(
-            vocab, cluster_embeddings, tfidf_dict_sorted, idf_threshold=0.26)
+        # new_vocabulary_dict = get_new_vocabulary(
+        #     vocab, cluster_embeddings, tfidf_dict_sorted, idf_threshold=0.26)
+
+        new_vocabulary_dict = get_new_vocabulary_from_channels(
+            vocab, cluster_embeddings)
+
         for new_vocab, feature in new_vocabulary_dict.items():
             vocab.append(new_vocab)
             cluster_embeddings = np.vstack([cluster_embeddings, feature])
