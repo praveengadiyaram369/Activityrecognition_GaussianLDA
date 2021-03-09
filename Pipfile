@@ -10,7 +10,6 @@ autopep8 = "*"
 numpy = "*"
 cython = "*"
 choldate = {editable = true,git = "https://github.com/modusdatascience/choldate.git"}
-gaussianlda = "*"
 sklearn = "*"
 pandas = "*"
 jupyter = "*"
@@ -23,6 +22,7 @@ umap-learn = "*"
 tensorflow = "==2.2.0"
 keras-tuner = "*"
 tqdm = "*"
+gaussianlda = {editable = true,git = "https://github.com/praveengadiyaram369/gaussianlda.git",ref = "topic_dist_per_doc"}
 
 [requires]
 python_version = "3.7"

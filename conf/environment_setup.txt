@@ -15,3 +15,4 @@
 15) pipenv install tensorflow==2.2.0
 16) pipenv install keras-tuner
 17) pipenv install tqdm
+18) pipenv install -e git+https://github.com/praveengadiyaram369/gaussianlda.git@topic_dist_per_doc#egg=gaussianlda
