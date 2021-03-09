@@ -277,7 +277,7 @@ def get_embeddings(embeddings_filepath):
 def get_cluster_embeddings(input_txt_filepath_train, input_txt_filepath_test, embeddings_filepath, cluster_cnts):
 
     reset_global_data()
-    stop_words_new_vocab_flag = True
+    stop_words_new_vocab_flag = False
     activity_doc_count_index = load_data(
         input_txt_filepath_train, train_or_test_flag=True)
     load_data(input_txt_filepath_test, train_or_test_flag=False)
@@ -302,16 +302,16 @@ def get_cluster_embeddings(input_txt_filepath_train, input_txt_filepath_test, em
         # new_vocabulary_dict = get_new_vocabulary(
         #     vocab, cluster_embeddings, tfidf_dict_sorted, idf_threshold=0.26)
 
-        #new_vocabulary_dict = get_new_vocabulary_from_channels(
+        # new_vocabulary_dict = get_new_vocabulary_from_channels(
         #    vocab, cluster_embeddings)
 
-        #for new_vocab, feature in new_vocabulary_dict.items():
+        # for new_vocab, feature in new_vocabulary_dict.items():
         #    vocab.append(new_vocab)
         #    cluster_embeddings = np.vstack([cluster_embeddings, feature])
 
         #assert len(vocab) == cluster_embeddings.shape[0]
 
-        #update_documents(list(new_vocabulary_dict.keys()))
+        # update_documents(list(new_vocabulary_dict.keys()))
 
     corpus = get_corpus(vocab)
 
