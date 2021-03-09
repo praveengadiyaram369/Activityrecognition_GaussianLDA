@@ -27,7 +27,9 @@ def print_testresults(test_results, classification_report_dict, cluster_cnts):
 
     with open("output/glda_performance_data.csv", "a", newline='') as fp:
         wr = csv.writer(fp, dialect='excel')
-        wr.writerow(glda_output)
+        wr.writerow(g)
+
+    print(f'finished writing results to file : {cluster_cnts} ')
 
     # for key, val in test_results.items():
 
@@ -73,13 +75,13 @@ if __name__ == "__main__":
     print(f'Total Vocabulary, V: {V}')
     print(f'Average No. of words per documents, B: {B}')
 
-
     num_topics = len(set(activity_labels))
 
     # Prepare a trainer
     trainer = GaussianLDAAliasTrainer(
         corpus, embeddings, vocab, num_topics, alpha, save_path=output_dir, kappa=0.3
     )
+    print(f'Starting glda clustering training : {cluster_cnts} ')
     # Set training running
     trainer.sample(10)
 
@@ -97,6 +99,7 @@ if __name__ == "__main__":
     test_doc_true = []
     test_doc_glda = []
 
+    print(f'Starting glda testing  : {cluster_cnts} ')
     for doc, activity in tqdm(zip(test_docs, test_doc_labels)):
         test_topics = model.sample(doc, iterations)
 
