@@ -1,4 +1,5 @@
 import os
+import sys
 import csv
 import numpy as np
 from gaussianlda import GaussianLDAAliasTrainer
@@ -13,7 +14,7 @@ from sklearn.metrics.cluster import adjusted_rand_score
 from tqdm import tqdm
 
 
-def print_testresults(test_results, classification_report_dict):
+def print_testresults(test_results, classification_report_dict, cluster_cnts):
 
     accuracy = classification_report_dict['accuracy']*100
     ari = classification_report_dict['adjusted_rand_index_score']
@@ -21,7 +22,7 @@ def print_testresults(test_results, classification_report_dict):
     weighted_average_recall = classification_report_dict['weighted avg']['recall'] * 100
     weighted_average_f1_score = classification_report_dict['weighted avg']['f1-score'] * 100
 
-    glda_output = [accuracy, ari,
+    glda_output = [cluster_cnts, accuracy, ari,
                    weighted_average_precision, weighted_average_recall, weighted_average_f1_score]
 
     with open("output/glda_performance_data.csv", "a", newline='') as fp:
@@ -57,9 +58,10 @@ if __name__ == "__main__":
 
     output_dir = "saved_model"
     alpha = 0.01
+    cluster_cnts = int(sys.argv[1])
 
     vocab, embeddings, corpus, activity_labels, activity_doc_count_index = get_cluster_embeddings(
-        input_txt_filepath_train, input_txt_filepath_test, embeddings_filepath)
+        input_txt_filepath_train, input_txt_filepath_test, embeddings_filepath, cluster_cnts)
 
     D = len(corpus)
     N = sum([len(val) for val in corpus])
@@ -110,4 +112,4 @@ if __name__ == "__main__":
         test_doc_true, test_doc_glda)
 
     print_testresults(
-        test_results, classification_report_dict)
+        test_results, classification_report_dict, cluster_cnts)

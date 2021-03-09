@@ -1,0 +1,10 @@
+python generate_subsequences_uci_har.py 500
+python glda_clustering.py 500
+python generate_subsequences_uci_har.py 750
+python glda_clustering.py 750
+python generate_subsequences_uci_har.py 1000
+python glda_clustering.py 1000
+python generate_subsequences_uci_har.py 1250
+python glda_clustering.py 1250
+python generate_subsequences_uci_har.py 1500
+python glda_clustering.py 1500

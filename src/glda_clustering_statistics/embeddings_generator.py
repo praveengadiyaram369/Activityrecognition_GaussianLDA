@@ -14,7 +14,7 @@ train_docs = []
 train_doc_labels = []
 test_docs = []
 test_doc_labels = []
-cluster_cnt = 250
+#cluster_cnt = 250
 sequence_names = ['X1', 'Y1', 'Z1', 'X2', 'Y2', 'Z2']
 clusters_channelwise = []
 
@@ -201,13 +201,13 @@ def get_new_vocabulary(vocab, cluster_embeddings, tfidf_dict_sorted, idf_thresho
     return new_vocabulary_dict
 
 
-def generate_cluster_names():
+def generate_cluster_names(cluster_cnts):
 
     vocab = []
     global clusters_channelwise
 
     for seq in sequence_names:
-        cluster_names = [seq+'_'+str(i) for i in range(cluster_cnt)]
+        cluster_names = [seq+'_'+str(i) for i in range(cluster_cnts)]
         clusters_channelwise.append(cluster_names)
         vocab.extend(cluster_names)
 
@@ -274,7 +274,7 @@ def get_embeddings(embeddings_filepath):
     return cluster_embeddings
 
 
-def get_cluster_embeddings(input_txt_filepath_train, input_txt_filepath_test, embeddings_filepath):
+def get_cluster_embeddings(input_txt_filepath_train, input_txt_filepath_test, embeddings_filepath, cluster_cnts):
 
     reset_global_data()
     stop_words_new_vocab_flag = True
@@ -282,7 +282,7 @@ def get_cluster_embeddings(input_txt_filepath_train, input_txt_filepath_test, em
         input_txt_filepath_train, train_or_test_flag=True)
     load_data(input_txt_filepath_test, train_or_test_flag=False)
 
-    vocab = generate_cluster_names()
+    vocab = generate_cluster_names(cluster_cnts)
     cluster_embeddings = get_embeddings(embeddings_filepath)
 
     assert len(vocab) == len(cluster_embeddings)
@@ -302,16 +302,16 @@ def get_cluster_embeddings(input_txt_filepath_train, input_txt_filepath_test, em
         # new_vocabulary_dict = get_new_vocabulary(
         #     vocab, cluster_embeddings, tfidf_dict_sorted, idf_threshold=0.26)
 
-        new_vocabulary_dict = get_new_vocabulary_from_channels(
-            vocab, cluster_embeddings)
+        #new_vocabulary_dict = get_new_vocabulary_from_channels(
+        #    vocab, cluster_embeddings)
 
-        for new_vocab, feature in new_vocabulary_dict.items():
-            vocab.append(new_vocab)
-            cluster_embeddings = np.vstack([cluster_embeddings, feature])
+        #for new_vocab, feature in new_vocabulary_dict.items():
+        #    vocab.append(new_vocab)
+        #    cluster_embeddings = np.vstack([cluster_embeddings, feature])
 
-        assert len(vocab) == cluster_embeddings.shape[0]
+        #assert len(vocab) == cluster_embeddings.shape[0]
 
-        update_documents(list(new_vocabulary_dict.keys()))
+        #update_documents(list(new_vocabulary_dict.keys()))
 
     corpus = get_corpus(vocab)
 

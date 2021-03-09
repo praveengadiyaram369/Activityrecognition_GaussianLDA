@@ -1,5 +1,6 @@
 # _importing required libraries
 import os
+import sys
 import collections
 import pickle
 
@@ -266,5 +267,5 @@ if __name__ == '__main__':
     statistics_train = window_sampling(train_df, window_length=20, window_overlap=10, flag_train=True)
     statistics_test = window_sampling(test_df, window_length=20, window_overlap=10)
 
-    cluster_cnts = 100
+    cluster_cnts = int(sys.argv[1])
     perform_clustering(statistics_train, statistics_test, channels=col_names[2:], cluster_cnts=cluster_cnts)
