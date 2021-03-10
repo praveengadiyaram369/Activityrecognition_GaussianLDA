@@ -241,7 +241,7 @@ def stop_words_generation(channels):
 
         stop_word_list.extend(each_channel(channel))
 
-    with open(os.getcwd() + f'/../data/stopwords.pkl', 'wb') as f:
+    with open(os.getcwd() + f'/../../data/stopwords.pkl', 'wb') as f:
         pickle.dump(stop_word_list, f)
 
 
@@ -295,8 +295,10 @@ if __name__ == '__main__':
         train_df, window_length=window_length, window_overlap=window_overlap, flag_train=True)
     statistics_test = window_sampling(
         test_df, window_length=window_length, window_overlap=window_overlap)
-    print(f'Finished statistics feature extraction  : {cluster_cnts}, {window_length}, {window_overlap} ')
+    print(
+        f'Finished statistics feature extraction  : {cluster_cnts}, {window_length}, {window_overlap} ')
 
-    print(f'Starting Clustering  : {cluster_cnts}, {window_length}, {window_overlap} ')
+    print(
+        f'Starting Clustering  : {cluster_cnts}, {window_length}, {window_overlap} ')
     perform_clustering(statistics_train, statistics_test,
                        channels=col_names[2:], cluster_cnts=cluster_cnts)
