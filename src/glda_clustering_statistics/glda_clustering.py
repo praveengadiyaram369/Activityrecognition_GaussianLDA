@@ -24,7 +24,6 @@ def print_testresults(test_results, classification_report_dict, cluster_cnts, wi
 
     glda_output = [window_length, window_overlap, cluster_cnts, accuracy, ari,
                    weighted_average_precision, weighted_average_recall, weighted_average_f1_score]
-    doc_details.extend(glda_output)
 
     with open("output/glda_performance_data.csv", "a", newline='') as fp:
         wr = csv.writer(fp, dialect='excel')
