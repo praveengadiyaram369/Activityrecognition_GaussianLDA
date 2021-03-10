@@ -279,6 +279,8 @@ def write_clustering_output(channels, flagtrain=False):
 if __name__ == '__main__':
 
     cluster_cnts = int(sys.argv[1])
+    window_length = int(sys.argv[2])
+    window_overlap = int(sys.argv[3])
     print(f'Starting generate_subsequences_uci_har  : {cluster_cnts} ')
 
     train_file_path = os.getcwd() + f'/../../data/output_csv/processed_data_train.csv'
@@ -290,11 +292,11 @@ if __name__ == '__main__':
     test_df = load_train_test_data(test_file_path, col_names)
 
     statistics_train = window_sampling(
-        train_df, window_length=20, window_overlap=10, flag_train=True)
+        train_df, window_length=window_length, window_overlap=window_overlap, flag_train=True)
     statistics_test = window_sampling(
-        test_df, window_length=20, window_overlap=10)
-    print(f'Finished statistics feature extraction  : {cluster_cnts} ')
+        test_df, window_length=window_length, window_overlap=window_overlap)
+    print(f'Finished statistics feature extraction  : {cluster_cnts}, {window_length}, {window_overlap} ')
 
-    print(f'Starting Clustering  : {cluster_cnts} ')
+    print(f'Starting Clustering  : {cluster_cnts}, {window_length}, {window_overlap} ')
     perform_clustering(statistics_train, statistics_test,
                        channels=col_names[2:], cluster_cnts=cluster_cnts)

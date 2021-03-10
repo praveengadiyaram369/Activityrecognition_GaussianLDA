@@ -14,7 +14,7 @@ from sklearn.metrics.cluster import adjusted_rand_score
 from tqdm import tqdm
 
 
-def print_testresults(test_results, classification_report_dict, cluster_cnts):
+def print_testresults(test_results, classification_report_dict, cluster_cnts, window_length, window_overlap):
 
     accuracy = classification_report_dict['accuracy']*100
     ari = classification_report_dict['adjusted_rand_index_score']
@@ -22,12 +22,12 @@ def print_testresults(test_results, classification_report_dict, cluster_cnts):
     weighted_average_recall = classification_report_dict['weighted avg']['recall'] * 100
     weighted_average_f1_score = classification_report_dict['weighted avg']['f1-score'] * 100
 
-    glda_output = [cluster_cnts, accuracy, ari,
+    glda_output = [window_length, window_overlap, cluster_cnts, accuracy, ari,
                    weighted_average_precision, weighted_average_recall, weighted_average_f1_score]
 
     with open("output/glda_performance_data.csv", "a", newline='') as fp:
         wr = csv.writer(fp, dialect='excel')
-        wr.writerow(g)
+        wr.writerow(glda_output)
 
     print(f'finished writing results to file : {cluster_cnts} ')
 
@@ -61,6 +61,8 @@ if __name__ == "__main__":
     output_dir = "saved_model"
     alpha = 0.01
     cluster_cnts = int(sys.argv[1])
+    window_length = int(sys.argv[2])
+    window_overlap = int(sys.argv[3])
 
     vocab, embeddings, corpus, activity_labels, activity_doc_count_index = get_cluster_embeddings(
         input_txt_filepath_train, input_txt_filepath_test, embeddings_filepath, cluster_cnts)
@@ -115,4 +117,4 @@ if __name__ == "__main__":
         test_doc_true, test_doc_glda)
 
     print_testresults(
-        test_results, classification_report_dict, cluster_cnts)
+        test_results, classification_report_dict, cluster_cnts, window_length, window_overlap)
