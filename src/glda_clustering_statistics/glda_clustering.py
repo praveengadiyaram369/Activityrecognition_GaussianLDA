@@ -14,7 +14,7 @@ from sklearn.metrics.cluster import adjusted_rand_score
 from tqdm import tqdm
 
 
-def print_testresults(test_results, classification_report_dict, cluster_cnts, window_length, window_overlap):
+def print_testresults(test_results, classification_report_dict, cluster_cnts, window_length, window_overlap, doc_details):
 
     accuracy = classification_report_dict['accuracy']*100
     ari = classification_report_dict['adjusted_rand_index_score']
@@ -24,10 +24,11 @@ def print_testresults(test_results, classification_report_dict, cluster_cnts, wi
 
     glda_output = [window_length, window_overlap, cluster_cnts, accuracy, ari,
                    weighted_average_precision, weighted_average_recall, weighted_average_f1_score]
+    doc_details.extend(glda_output)
 
     with open("output/glda_performance_data.csv", "a", newline='') as fp:
         wr = csv.writer(fp, dialect='excel')
-        wr.writerow(glda_output)
+        wr.writerow(doc_details)
 
     print(f'finished writing results to file : {cluster_cnts} ')
 
@@ -117,4 +118,4 @@ if __name__ == "__main__":
         test_doc_true, test_doc_glda)
 
     print_testresults(
-        test_results, classification_report_dict, cluster_cnts, window_length, window_overlap)
+        test_results, classification_report_dict, cluster_cnts, window_length, window_overlap, [D, N, V, B])
