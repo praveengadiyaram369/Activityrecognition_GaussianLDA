@@ -3,6 +3,7 @@ import os
 import glob
 import numpy as np
 import pickle
+import json
 
 from collections import defaultdict, Counter
 from sklearn.model_selection import train_test_split
@@ -260,30 +261,39 @@ def get_corpus(vocab):
     return corpus
 
 
-def get_embeddings(embeddings_filepath):
+def get_embeddings(embeddings_filepath,cluster_cnts=100, flag_jsonfile=False):
 
-    data = (open(embeddings_filepath, "r")).read().splitlines()
-    embeddings = [emb.split(',') for emb in data]
+    if flag_jsonfile:
+
+        with open(embeddings_filepath) as json_file: 
+            data = json.load(json_file)
+        embeddings = list(data.values())
+        vocab = list(data.keys())
+
+    else:
+        data = (open(embeddings_filepath, "r")).read().splitlines()
+        embeddings = [emb.split(',') for emb in data]
+        vocab = generate_cluster_names(cluster_cnts)
 
     cluster_embeddings = np.array(embeddings)
     # cluster_embeddings = cluster_embeddings[:, [0, 1]]
     cluster_embeddings[cluster_embeddings == ''] = '0.0'
     cluster_embeddings = cluster_embeddings.astype(np.float)
     cluster_embeddings = Normalizer().fit_transform(cluster_embeddings)
+    #print(type(cluster_embeddings))
 
-    return cluster_embeddings
+    return vocab, cluster_embeddings
 
 
 def get_cluster_embeddings(input_txt_filepath_train, input_txt_filepath_test, embeddings_filepath, cluster_cnts):
 
     reset_global_data()
-    stop_words_new_vocab_flag = True
+    stop_words_new_vocab_flag = False
     activity_doc_count_index = load_data(
         input_txt_filepath_train, train_or_test_flag=True)
     load_data(input_txt_filepath_test, train_or_test_flag=False)
 
-    vocab = generate_cluster_names(cluster_cnts)
-    cluster_embeddings = get_embeddings(embeddings_filepath)
+    vocab, cluster_embeddings = get_embeddings(embeddings_filepath, flag_jsonfile=True)
 
     assert len(vocab) == len(cluster_embeddings)
 
@@ -302,16 +312,16 @@ def get_cluster_embeddings(input_txt_filepath_train, input_txt_filepath_test, em
         # new_vocabulary_dict = get_new_vocabulary(
         #     vocab, cluster_embeddings, tfidf_dict_sorted, idf_threshold=0.26)
 
-        #new_vocabulary_dict = get_new_vocabulary_from_channels(
+        # new_vocabulary_dict = get_new_vocabulary_from_channels(
         #    vocab, cluster_embeddings)
 
-        #for new_vocab, feature in new_vocabulary_dict.items():
+        # for new_vocab, feature in new_vocabulary_dict.items():
         #    vocab.append(new_vocab)
         #    cluster_embeddings = np.vstack([cluster_embeddings, feature])
 
         #assert len(vocab) == cluster_embeddings.shape[0]
 
-        #update_documents(list(new_vocabulary_dict.keys()))
+        # update_documents(list(new_vocabulary_dict.keys()))
 
     corpus = get_corpus(vocab)
 

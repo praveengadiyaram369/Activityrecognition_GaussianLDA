@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
     # _for cluster embeddings
     embeddings_filepath = os.getcwd(
-    ) + f'/../../data/sub_sequence_output/word_embeddings_from_clusters.txt'
+    ) + f'/../../data/sub_sequence_output/word_embeddings_from_clusters.json'
 
     output_dir = "saved_model"
     alpha = 0.01

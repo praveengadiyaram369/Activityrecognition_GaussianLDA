@@ -3,6 +3,7 @@ import os
 import sys
 import collections
 import pickle
+import json
 
 import pandas as pd
 import numpy as np
@@ -13,6 +14,7 @@ import statistics
 
 sensory_words_traindf = pd.DataFrame()
 sensory_words_testdf = pd.DataFrame()
+words_embedding_dict = {}
 
 
 def load_train_test_data(input_file_path, col_names):
@@ -191,7 +193,7 @@ def cluster_word_sort(axis_clusters, cluster_names):
     return result.iloc[:, 1:]
 
 
-def perform_clustering(statistics_train, statistics_test, channels, cluster_cnts):
+def perform_clustering(statistics_train, statistics_test, channels, cluster_cnts, words_generation_flag=False):
 
     clusters_centroid = []
     centroid_statistic = []
@@ -210,17 +212,30 @@ def perform_clustering(statistics_train, statistics_test, channels, cluster_cnts
 
             cluster_stats = cluster_word_sort(axis_clusters, cluster_names[j])
             centroid_statistic.append(cluster_stats)
+            words_embedding_dict[cluster_names[j]] = cluster_stats.values[0].tolist()
 
-    embeddings_filepath = os.getcwd(
-    ) + f'/../../data/sub_sequence_output/word_embeddings_from_clusters.txt'
-    pd.concat(centroid_statistic).to_csv(
-        embeddings_filepath, index=False, header=False)
-    # writing train documents to text files
-    write_clustering_output(channels, flagtrain=True)
-    # writing test documents to text files
-    write_clustering_output(channels)
     # stop words generation
     stop_words_generation(channels)
+    if words_generation_flag:
+        # new words generations inter sensor channels for train
+        new_words_generation(channels, flag_train=True)
+        # new words generations inter sensor channels for test
+        new_words_generation(channels)
+        embeddings_filepath = os.getcwd(
+            ) + f'/../../data/sub_sequence_output/word_embeddings_from_clusters.json'
+        with open(embeddings_filepath, 'w') as fp:
+            json.dump(words_embedding_dict, fp)
+    else:
+
+        embeddings_filepath = os.getcwd(
+            ) + f'/../../data/sub_sequence_output/word_embeddings_from_clusters.txt'
+        pd.concat(centroid_statistic).to_csv(
+            embeddings_filepath, index=False, header=False)
+    
+    # writing train documents to text files
+    write_clustering_output(sensory_words_traindf.columns[2:], flag_train=True)
+    # writing test documents to text files
+    write_clustering_output(sensory_words_testdf.columns[2:])
 
     print(f'Finished generate_subsequences_uci_har  : {cluster_cnts} ')
 
@@ -245,9 +260,9 @@ def stop_words_generation(channels):
         pickle.dump(stop_word_list, f)
 
 
-def write_clustering_output(channels, flagtrain=False):
+def write_clustering_output(channels, flag_train=False):
 
-    if flagtrain:
+    if flag_train:
 
         # _combine individual words as documents
         sensory_words_traindf['final_sub_sequence'] = sensory_words_traindf[channels].apply(
@@ -276,6 +291,31 @@ def write_clustering_output(channels, flagtrain=False):
                 'final_sub_sequence']].to_csv(output_filepath, sep='\t', index=False, header=False)
 
 
+
+def form_words(row, flag_train=False):
+    
+    temp = []
+    temp = row.values
+    if flag_train:
+        words_embedding_dict[temp[0]+temp[1]+temp[2]] =  [x + y + z 
+        for x, y, z in zip(words_embedding_dict[temp[0]], words_embedding_dict[temp[1]], words_embedding_dict[temp[2]])]
+    
+    return ''.join(temp.astype(str))
+
+
+def new_words_generation(channels, flag_train=False):
+
+    for acc_axis in channels[:3]:
+        temp = []
+        for gyro_axis in channels[3:]:
+            
+            if acc_axis[0] != gyro_axis[0]:
+
+                temp.append(gyro_axis)
+        sensory_words_traindf[acc_axis + temp[0] + temp[1]] = sensory_words_traindf[[acc_axis, temp[0], temp[1]]].apply(lambda row: form_words(row, flag_train), axis=1)
+
+
+
 if __name__ == '__main__':
 
     cluster_cnts = int(sys.argv[1])
@@ -301,4 +341,4 @@ if __name__ == '__main__':
     print(
         f'Starting Clustering  : {cluster_cnts}, {window_length}, {window_overlap} ')
     perform_clustering(statistics_train, statistics_test,
-                       channels=col_names[2:], cluster_cnts=cluster_cnts)
+                       channels=col_names[2:], cluster_cnts=cluster_cnts, words_generation_flag=True)
