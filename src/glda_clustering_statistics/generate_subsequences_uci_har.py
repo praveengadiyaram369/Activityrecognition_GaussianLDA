@@ -320,10 +320,10 @@ def new_words_generation(channels, flag_train=False):
         temp = combinations[1:]
         if flag_train:
             sensory_words_traindf[acc_axis + temp[0] + temp[1] + temp[2]] = sensory_words_traindf[[
-                acc_axis, temp[0], temp[1] + temp[2]]].apply(lambda row: form_words(row, flag_train), axis=1)
+                acc_axis, temp[0], temp[1], temp[2]]].apply(lambda row: form_words(row, flag_train), axis=1)
         else:
             sensory_words_testdf[acc_axis + temp[0] + temp[1] + temp[2]] = sensory_words_testdf[[
-                acc_axis, temp[0], temp[1] + temp[2]]].apply(lambda row: form_words(row), axis=1)
+                acc_axis, temp[0], temp[1], temp[2]]].apply(lambda row: form_words(row), axis=1)
 
     # for acc_axis in channels[:3]:
     #     temp = []
@@ -343,22 +343,38 @@ if __name__ == '__main__':
     cluster_cnts = int(sys.argv[1])
     window_length = int(sys.argv[2])
     window_overlap = int(sys.argv[3])
+    generate_subsequences_flag = False
+    
+    print('\n\n\n')
     print(f'Starting generate_subsequences_uci_har  : {cluster_cnts} ')
 
-    train_file_path = os.getcwd() + f'/../../data/output_csv/processed_data_train.csv'
-    test_file_path = os.getcwd() + f'/../../data/output_csv/processed_data_test.csv'
-    col_names = ['subject_id', 'activityID',
-                 'X1', 'Y1', 'Z1', 'X2', 'Y2', 'Z2']
+    if generate_subsequences_flag:
+        train_file_path = os.getcwd() + f'/../../data/output_csv/processed_data_train.csv'
+        test_file_path = os.getcwd() + f'/../../data/output_csv/processed_data_test.csv'
+        col_names = ['subject_id', 'activityID',
+                    'X1', 'Y1', 'Z1', 'X2', 'Y2', 'Z2']
 
-    train_df = load_train_test_data(train_file_path, col_names)
-    test_df = load_train_test_data(test_file_path, col_names)
+        train_df = load_train_test_data(train_file_path, col_names)
+        test_df = load_train_test_data(test_file_path, col_names)
 
-    statistics_train = window_sampling(
-        train_df, window_length=window_length, window_overlap=window_overlap, flag_train=True)
-    statistics_test = window_sampling(
-        test_df, window_length=window_length, window_overlap=window_overlap)
-    print(
-        f'Finished statistics feature extraction  : {cluster_cnts}, {window_length}, {window_overlap} ')
+        statistics_train = window_sampling(
+            train_df, window_length=window_length, window_overlap=window_overlap, flag_train=True)
+        statistics_test = window_sampling(
+            test_df, window_length=window_length, window_overlap=window_overlap)
+        print(
+            f'Finished statistics feature extraction  : {cluster_cnts}, {window_length}, {window_overlap} ')
+
+        with open(os.getcwd() + f'/../../data/statistics_train.pkl', 'wb') as f:
+            pickle.dump(statistics_train, f)
+
+        with open(os.getcwd() + f'/../../data/statistics_test.pkl', 'wb') as f:
+            pickle.dump(statistics_test, f)
+
+    with open(os.getcwd() + f'/../../data/statistics_train.pkl', "rb") as doc:
+        statistics_train = pickle.load(doc)
+    
+    with open(os.getcwd() + f'/../../data/statistics_test.pkl', "rb") as doc:
+        statistics_test = pickle.load(doc)
 
     print(
         f'Starting Clustering  : {cluster_cnts}, {window_length}, {window_overlap} ')
