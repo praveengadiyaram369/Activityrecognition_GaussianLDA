@@ -24,7 +24,7 @@ def get_cluster_names(prefix):
 def get_umap_data(data):
     
     data = Normalizer().fit_transform(data)
-    model_umap = umap.UMAP(n_neighbors = 50, min_dist = 0.1, n_components = 5)
+    model_umap = umap.UMAP(n_neighbors = 10, min_dist = 0.1, n_components = 5)
     umap_vec = model_umap.fit_transform(data)
 
     featureVec = Normalizer().fit_transform(umap_vec)

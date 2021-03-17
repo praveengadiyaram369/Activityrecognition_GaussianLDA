@@ -8,6 +8,7 @@ import json
 import pandas as pd
 import numpy as np
 from sklearn.cluster import KMeans
+from sklearn.preprocessing import Normalizer
 from scipy import stats
 import statistics
 
@@ -153,6 +154,9 @@ def get_assigned_words(seq_clusters, cluster_words, axis, flag_train=False):
 
 def clustering(statistic_train_df, statistic_test_df, axis, cluster_cnts, cluster_words):
 
+    statistic_train_df = Normalizer().fit_transform(np.array(statistic_train_df))
+    statistic_test_df = Normalizer().fit_transform(np.array(statistic_test_df))
+
     model = KMeans(n_clusters=cluster_cnts).fit(statistic_train_df)
 
     cluster_ids = pd.DataFrame(model.predict(
@@ -212,7 +216,8 @@ def perform_clustering(statistics_train, statistics_test, channels, cluster_cnts
 
             cluster_stats = cluster_word_sort(axis_clusters, cluster_names[j])
             centroid_statistic.append(cluster_stats)
-            words_embedding_dict[cluster_names[j]] = cluster_stats.values[0].tolist()
+            words_embedding_dict[cluster_names[j]
+                                 ] = cluster_stats.values[0].tolist()
 
     # stop words generation
     stop_words_generation(channels)
@@ -222,16 +227,16 @@ def perform_clustering(statistics_train, statistics_test, channels, cluster_cnts
         # new words generations inter sensor channels for test
         new_words_generation(channels)
         embeddings_filepath = os.getcwd(
-            ) + f'/../../data/sub_sequence_output/word_embeddings_from_clusters.json'
+        ) + f'/../../data/sub_sequence_output/word_embeddings_from_clusters.json'
         with open(embeddings_filepath, 'w') as fp:
             json.dump(words_embedding_dict, fp)
     else:
 
         embeddings_filepath = os.getcwd(
-            ) + f'/../../data/sub_sequence_output/word_embeddings_from_clusters.txt'
+        ) + f'/../../data/sub_sequence_output/word_embeddings_from_clusters.txt'
         pd.concat(centroid_statistic).to_csv(
             embeddings_filepath, index=False, header=False)
-    
+
     # writing train documents to text files
     write_clustering_output(sensory_words_traindf.columns[2:], flag_train=True)
     # writing test documents to text files
@@ -291,29 +296,46 @@ def write_clustering_output(channels, flag_train=False):
                 'final_sub_sequence']].to_csv(output_filepath, sep='\t', index=False, header=False)
 
 
-
 def form_words(row, flag_train=False):
-    
+
     temp = []
     temp = row.values
     if flag_train:
-        words_embedding_dict[temp[0]+temp[1]+temp[2]] =  [x + y + z 
-        for x, y, z in zip(words_embedding_dict[temp[0]], words_embedding_dict[temp[1]], words_embedding_dict[temp[2]])]
-    
+        # words_embedding_dict[temp[0]+temp[1]+temp[2]] =  [x + y + z
+        # for x, y, z in zip(words_embedding_dict[temp[0]], words_embedding_dict[temp[1]], words_embedding_dict[temp[2]])]
+
+        words_embedding_dict[temp[0]+temp[1]+temp[2]+temp[3]] = [v1+v2+v3+v4
+                                                                 for v1, v2, v3, v4 in zip(words_embedding_dict[temp[0]], words_embedding_dict[temp[1]], words_embedding_dict[temp[2]], words_embedding_dict[temp[2]])]
+
     return ''.join(temp.astype(str))
 
 
 def new_words_generation(channels, flag_train=False):
 
-    for acc_axis in channels[:3]:
-        temp = []
-        for gyro_axis in channels[3:]:
-            
-            if acc_axis[0] != gyro_axis[0]:
+    word_combinations = [['X1', 'Y1', 'Y2', 'Z2'], ['X1', 'Z1', 'X2', 'Y2'], ['Y1', 'Z1', 'X2', 'Z2'], [
+        'X1', 'Y1', 'X2', 'Z2'], ['X1', 'Z1', 'Y2', 'Z2'], ['Y1', 'Z1', 'X2', 'Y2']]
 
-                temp.append(gyro_axis)
-        sensory_words_traindf[acc_axis + temp[0] + temp[1]] = sensory_words_traindf[[acc_axis, temp[0], temp[1]]].apply(lambda row: form_words(row, flag_train), axis=1)
+    for idx, combinations in enumerate(word_combinations):
+        acc_axis = combinations[0]
+        temp = combinations[1:]
+        if flag_train:
+            sensory_words_traindf[acc_axis + temp[0] + temp[1] + temp[2]] = sensory_words_traindf[[
+                acc_axis, temp[0], temp[1] + temp[2]]].apply(lambda row: form_words(row, flag_train), axis=1)
+        else:
+            sensory_words_testdf[acc_axis + temp[0] + temp[1] + temp[2]] = sensory_words_testdf[[
+                acc_axis, temp[0], temp[1] + temp[2]]].apply(lambda row: form_words(row), axis=1)
 
+    # for acc_axis in channels[:3]:
+    #     temp = []
+    #     for gyro_axis in channels[3:]:
+
+    #         if acc_axis[0] != gyro_axis[0]:
+
+    #             temp.append(gyro_axis)
+    #     if flag_train:
+    #         sensory_words_traindf[acc_axis + temp[0] + temp[1]] = sensory_words_traindf[[acc_axis, temp[0], temp[1]]].apply(lambda row: form_words(row, flag_train), axis=1)
+    #     else:
+    #         sensory_words_testdf[acc_axis + temp[0] + temp[1]] = sensory_words_testdf[[acc_axis, temp[0], temp[1]]].apply(lambda row: form_words(row), axis=1)
 
 
 if __name__ == '__main__':
