@@ -17,123 +17,9 @@ sensory_words_traindf = pd.DataFrame()
 sensory_words_testdf = pd.DataFrame()
 words_embedding_dict = {}
 
-
-def load_train_test_data(input_file_path, col_names):
-
-    main_df = pd.read_csv(input_file_path, names=col_names)
-    main_df = main_df.astype({'subject_id': int, 'activityID': int})
-
-    return main_df
-
-
-def subsequence_statistics(subsequences):
-
-    Mean = []
-    Standard_deviation = []
-    Skewness = []
-    IQR = []
-    # Min=[]
-    # Max=[]
-    # Median=[]
-    # Range=[]
-    Lower_quartile = []
-    Middle_quartile = []
-    Upper_quartile = []
-    # Coefficient_of_variation=[]
-    # Kurtosis=[]
-    for i in range(0, len(subsequences)):
-
-        mean = sum(subsequences[i])/len(subsequences[i])
-        Mean.append(mean)
-
-        std = statistics.stdev(subsequences[i])
-        Standard_deviation.append(std)
-
-        # Cov=std/mean
-        # Coefficient_of_variation.append(Cov)
-
-        # minimum=min(subsequences[i])
-        # Min.append(minimum)
-
-        # maximum=max(subsequences[i])
-        # Max.append(maximum)
-
-        # range1=maximum-minimum
-        # Range.append(range1)
-
-        skewness = stats.skew(subsequences[i])
-        Skewness.append(skewness)
-
-        # median=statistics.median(subsequences[i])
-        # Median.append(median)
-
-        q3, q2, q1 = np.percentile(subsequences[i], [75, 50, 25])
-
-        Lower_quartile.append(q1)
-
-        Middle_quartile.append(q2)
-
-        Upper_quartile.append(q3)
-
-        iqr = q3 - q1
-        IQR.append(iqr)
-
-        # kurtosis=stats.kurtosis(subsequences[i])
-        # Kurtosis.append(kurtosis)
-
-    data = list(zip(Mean, Standard_deviation, Skewness, IQR))
-    statistic_feature_df = pd.DataFrame(
-        data, columns=['Mean', 'Standard_deviation', 'Skewness', 'IQR'])
-
-    return statistic_feature_df
-
-
-def window_sampling(main_df, window_length, window_overlap, flag_train=False):
-
-    max_window_index = len(main_df.index)
-    sequence_names = main_df.columns.tolist()
-    num_of_subsequences = len(sequence_names)
-    sub_sequences = [[] for x in range(num_of_subsequences)]
-
-    window_index = 0
-
-    while window_index <= (max_window_index - window_length):
-
-        activity_sequence = main_df[sequence_names[1]
-                                    ][window_index:window_index+window_length].tolist()
-        subject_sequence = main_df[sequence_names[0]
-                                   ][window_index:window_index+window_length].tolist()
-        if len(set(activity_sequence)) == 1:
-            sub_sequences[1].append(activity_sequence[0])
-            sub_sequences[0].append(subject_sequence[0])
-
-            for idx in range(2, num_of_subsequences):
-                sub_sequences[idx].append(
-                    main_df[sequence_names[idx]][window_index:window_index+window_length].tolist())
-
-        window_index += window_overlap
-
-    # _converting into numpy arrays
-    np_sequences = np.asarray(sub_sequences[2:])
-    # print(np_sequences.shape)
-    # Initializing sensory words dataframe with null values
-    #sensory_words_traindf = pd.DataFrame(columns=sequence_names)
-    if flag_train:
-        sensory_words_traindf['subject_id'] = sub_sequences[0]
-        sensory_words_traindf['activityID'] = sub_sequences[1]
-    else:
-        sensory_words_testdf['subject_id'] = sub_sequences[0]
-        sensory_words_testdf['activityID'] = sub_sequences[1]
-
-    statistics_list = []
-    for idx in range(0, np_sequences.shape[0]):
-        statistic_df_axis = subsequence_statistics(np_sequences[idx])
-        statistics_list.append(statistic_df_axis)
-
-    return statistics_list
-
-
 # assigning words for each cluster
+
+
 def get_assigned_words(seq_clusters, cluster_words, axis, flag_train=False):
 
     # _assign word to each cluster of the subsequence usnig numpy where function
@@ -157,7 +43,8 @@ def clustering(statistic_train_df, statistic_test_df, axis, cluster_cnts, cluste
     statistic_train_df = Normalizer().fit_transform(np.array(statistic_train_df))
     statistic_test_df = Normalizer().fit_transform(np.array(statistic_test_df))
 
-    model = KMeans(n_clusters=cluster_cnts).fit(statistic_train_df)
+    model = KMeans(n_clusters=cluster_cnts,
+                   random_state=234).fit(statistic_train_df)
 
     cluster_ids = pd.DataFrame(model.predict(
         statistic_train_df), columns=['cluster ID'])
@@ -170,7 +57,7 @@ def clustering(statistic_train_df, statistic_test_df, axis, cluster_cnts, cluste
     get_assigned_words(cluster_test_ids.to_numpy(), cluster_words, axis)
 
     centroids_of_clusters = pd.DataFrame(model.cluster_centers_[cluster_ids['cluster ID']],
-                                         columns=['Mean_c', 'Standard_deviation_c', 'Skewness_c', 'IQR_c'])
+                                         columns=[f'dim_{val}' for val in range(statistic_train_df.shape[1])])
     result = pd.concat([assigned_clusterWord, centroids_of_clusters], axis=1)
     result = result.drop_duplicates()
 
@@ -338,31 +225,165 @@ def new_words_generation(channels, flag_train=False):
     #         sensory_words_testdf[acc_axis + temp[0] + temp[1]] = sensory_words_testdf[[acc_axis, temp[0], temp[1]]].apply(lambda row: form_words(row), axis=1)
 
 
+def load_train_test_data(input_file_path, col_names):
+
+    main_df = pd.read_csv(input_file_path, names=col_names)
+    main_df = main_df.astype({'subject_id': int, 'activityID': int})
+
+    return main_df
+
+
+def window_sampling(main_df, window_length, window_overlap):
+
+    max_window_index = len(main_df.index)
+    num_of_subsequences = len(col_names)
+    sub_sequences = [[] for x in range(num_of_subsequences)]
+
+    window_index = 0
+
+    while window_index <= (max_window_index - window_length):
+
+        activity_sequence = main_df[col_names[1]
+                                    ][window_index:window_index+window_length].tolist()
+        subject_sequence = main_df[col_names[0]
+                                   ][window_index:window_index+window_length].tolist()
+
+        if len(set(subject_sequence)) == 1:
+            sub_sequences[1].append(activity_sequence[0])
+            sub_sequences[0].append(subject_sequence[0])
+
+            for idx in range(2, num_of_subsequences):
+                sub_sequences[idx].append(
+                    main_df[col_names[idx]][window_index:window_index+window_length].tolist())
+
+        window_index += window_overlap
+
+    # _converting into numpy arrays
+    np_sequences = np.asarray(sub_sequences[2:])
+    subject_activity_seq = np.asarray(sub_sequences[:2])
+
+    return subject_activity_seq, np_sequences
+
+
+def feature_sum(vec_list):
+    vec_sum = vec_list[0]
+
+    for idx in range(1, len(vec_list)):
+        vec_sum += vec_list[idx]
+
+    return vec_sum.tolist()
+
+
+def onehotenocding_pooling(subject_activity_seq, subsequences, pooling_size=3):
+
+    max_window_index = subject_activity_seq.shape[1]
+    num_of_subsequences = len(col_names)
+    pooled_features = [[] for x in range(num_of_subsequences)]
+    window_index = 0
+
+    while window_index <= (max_window_index - pooling_size):
+
+        activity_sequence = subject_activity_seq[1
+                                                 ][window_index:window_index+pooling_size].tolist()
+        subject_sequence = subject_activity_seq[0
+                                                ][window_index:window_index+pooling_size].tolist()
+
+        if len(set(subject_sequence)) == 1:
+            pooled_features[1].append(activity_sequence[0])
+            pooled_features[0].append(subject_sequence[0])
+
+            for idx in range(2, num_of_subsequences):
+                pooled_features[idx].append(
+                    feature_sum(subsequences[idx-2][window_index:window_index+pooling_size]))
+
+        window_index += pooling_size
+
+    # _converting into numpy arrays
+    np_sequences = np.asarray(pooled_features[2:])
+    subject_activity_seq = np.asarray(pooled_features[:2])
+
+    return subject_activity_seq, np_sequences
+
+
+def get_kmeans_clusters(sub_sequence_train, sub_sequence_test, feature_dim):
+
+    model = KMeans(n_clusters=feature_dim,
+                   random_state=5).fit(sub_sequence_train)
+    cluster_train_ids = pd.DataFrame(model.predict(
+        sub_sequence_train), columns=['cluster ID'])
+    cluster_test_ids = pd.DataFrame(model.predict(
+        sub_sequence_test), columns=['cluster ID'])
+
+    one_hot_features_train = pd.get_dummies(cluster_train_ids.astype('str'))
+    one_hot_features_test = pd.get_dummies(cluster_test_ids.astype('str'))
+
+    return one_hot_features_train.values.tolist(), one_hot_features_test.values.tolist()
+
+
 if __name__ == '__main__':
 
-    cluster_cnts = int(sys.argv[1])
-    window_length = int(sys.argv[2])
-    window_overlap = int(sys.argv[3])
-
     print('\n\n\n')
-    print(f'Starting generate_subsequences_uci_har  : {cluster_cnts} ')
+    print('Starting histogram features....')
+
+    feature_dim = int(sys.argv[1])
+    pooling_size = int(sys.argv[2])
+    cluster_cnts = int(sys.argv[3])
+    window_length = 16
+    window_overlap = 8
 
     train_file_path = os.getcwd() + f'/../../data/output_csv/processed_data_train.csv'
     test_file_path = os.getcwd() + f'/../../data/output_csv/processed_data_test.csv'
     col_names = ['subject_id', 'activityID',
-                'X1', 'Y1', 'Z1', 'X2', 'Y2', 'Z2']
+                 'X1', 'Y1', 'Z1', 'X2', 'Y2', 'Z2']
 
     train_df = load_train_test_data(train_file_path, col_names)
     test_df = load_train_test_data(test_file_path, col_names)
 
-    statistics_train = window_sampling(
-        train_df, window_length=window_length, window_overlap=window_overlap, flag_train=True)
-    statistics_test = window_sampling(
+    print('Starting windowing features....')
+
+    train_subject_activity_seq, train_subsequences = window_sampling(
+        train_df, window_length=window_length, window_overlap=window_overlap)
+    test_subject_activity_seq, test_subsequences = window_sampling(
         test_df, window_length=window_length, window_overlap=window_overlap)
+
+    assert train_subject_activity_seq.shape[1] == train_subsequences.shape[1]
+    assert test_subject_activity_seq.shape[1] == test_subsequences.shape[1]
+
+    pooled_features_train = []
+    pooled_features_test = []
+
+    print('Starting feature clustering and pooling ....')
+    for idx in range(6):
+        train_data, test_data = get_kmeans_clusters(
+            train_subsequences[idx], test_subsequences[idx], feature_dim)
+
+        pooled_features_train.append(train_data)
+        pooled_features_test.append(test_data)
+
+    pooled_features_train = np.array(pooled_features_train)
+    pooled_features_test = np.array(pooled_features_test)
+
+    train_subject_activity_seq_pooled, train_subsequences_pooled = onehotenocding_pooling(
+        train_subject_activity_seq, pooled_features_train, pooling_size)
+    test_subject_activity_seq_pooled, test_subsequences_pooled = onehotenocding_pooling(
+        test_subject_activity_seq, pooled_features_test, pooling_size)
+
+    assert train_subject_activity_seq_pooled.shape[1] == train_subsequences_pooled.shape[1]
+    assert test_subject_activity_seq_pooled.shape[1] == test_subsequences_pooled.shape[1]
+
+    sensory_words_traindf['subject_id'] = train_subject_activity_seq_pooled[0]
+    sensory_words_traindf['activityID'] = train_subject_activity_seq_pooled[1]
+
+    sensory_words_testdf['subject_id'] = test_subject_activity_seq_pooled[0]
+    sensory_words_testdf['activityID'] = test_subject_activity_seq_pooled[1]
+
     print(
-        f'Finished statistics feature extraction  : {cluster_cnts}, {window_length}, {window_overlap} ')
+        f'Finished feature extraction  : {cluster_cnts}, {window_length}, {window_overlap} ')
 
     print(
         f'Starting Clustering  : {cluster_cnts}, {window_length}, {window_overlap} ')
-    perform_clustering(statistics_train, statistics_test,
+
+    perform_clustering(train_subsequences_pooled, test_subsequences_pooled,
                        channels=col_names[2:], cluster_cnts=cluster_cnts, words_generation_flag=True)
+
+    print('Ending histogram features....')
