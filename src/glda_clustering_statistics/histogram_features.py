@@ -86,7 +86,6 @@ def cluster_word_sort(axis_clusters, cluster_names):
 
 def perform_clustering(statistics_train, statistics_test, channels, cluster_cnts, words_generation_flag=False):
 
-    clusters_centroid = []
     centroid_statistic = []
 
     words_dict = generate_cluster_names(channels, cluster_cnts)
@@ -96,8 +95,6 @@ def perform_clustering(statistics_train, statistics_test, channels, cluster_cnts
         cluster_names = words_dict[axis]
         axis_clusters = clustering(
             statistic_train_df, statistic_test_df, axis, cluster_cnts, cluster_names)
-
-        clusters_centroid.append(axis_clusters)
 
         for j in range(len(cluster_names)):
 
@@ -185,44 +182,45 @@ def write_clustering_output(channels, flag_train=False):
 
 def form_words(row, flag_train=False):
 
-    temp = []
-    temp = row.values
+    temp = list(row.values.astype(str))
     if flag_train:
-        # words_embedding_dict[temp[0]+temp[1]+temp[2]] =  [x + y + z
-        # for x, y, z in zip(words_embedding_dict[temp[0]], words_embedding_dict[temp[1]], words_embedding_dict[temp[2]])]
+        dict_key = ''.join(temp)
 
-        words_embedding_dict[temp[0]+temp[1]+temp[2]+temp[3]] = [v1+v2+v3+v4
-                                                                 for v1, v2, v3, v4 in zip(words_embedding_dict[temp[0]], words_embedding_dict[temp[1]], words_embedding_dict[temp[2]], words_embedding_dict[temp[2]])]
+        for idx in range(len(words_embedding_dict[temp[0]])):
+            vec_list = []
+            for val in temp:
+                vec_list.append(words_embedding_dict[val])
 
-    return ''.join(temp.astype(str))
+        words_embedding_dict[dict_key] = feature_sum(vec_list)
+
+    return ''.join(temp)
 
 
-def new_words_generation(channels, flag_train=False):
-
-    word_combinations = [['X1', 'Y1', 'Y2', 'Z2'], ['X1', 'Z1', 'X2', 'Y2'], ['Y1', 'Z1', 'X2', 'Z2'], [
-        'X1', 'Y1', 'X2', 'Z2'], ['X1', 'Z1', 'Y2', 'Z2'], ['Y1', 'Z1', 'X2', 'Y2']]
+def generate_word_combinations(word_combinations, flag_train):
 
     for idx, combinations in enumerate(word_combinations):
         acc_axis = combinations[0]
         temp = combinations[1:]
+        new_channel_key = ''.join(combinations)
         if flag_train:
-            sensory_words_traindf[acc_axis + temp[0] + temp[1] + temp[2]] = sensory_words_traindf[[
-                acc_axis, temp[0], temp[1], temp[2]]].apply(lambda row: form_words(row, flag_train), axis=1)
+            sensory_words_traindf[new_channel_key] = sensory_words_traindf[combinations].apply(
+                lambda row: form_words(row, flag_train), axis=1)
         else:
-            sensory_words_testdf[acc_axis + temp[0] + temp[1] + temp[2]] = sensory_words_testdf[[
-                acc_axis, temp[0], temp[1], temp[2]]].apply(lambda row: form_words(row), axis=1)
+            sensory_words_testdf[new_channel_key] = sensory_words_testdf[combinations].apply(
+                lambda row: form_words(row), axis=1)
 
-    # for acc_axis in channels[:3]:
-    #     temp = []
-    #     for gyro_axis in channels[3:]:
 
-    #         if acc_axis[0] != gyro_axis[0]:
+def new_words_generation(channels, flag_train=False):
 
-    #             temp.append(gyro_axis)
-    #     if flag_train:
-    #         sensory_words_traindf[acc_axis + temp[0] + temp[1]] = sensory_words_traindf[[acc_axis, temp[0], temp[1]]].apply(lambda row: form_words(row, flag_train), axis=1)
-    #     else:
-    #         sensory_words_testdf[acc_axis + temp[0] + temp[1]] = sensory_words_testdf[[acc_axis, temp[0], temp[1]]].apply(lambda row: form_words(row), axis=1)
+    two_word_combinations, three_word_combinations = True, True
+    word_combinations_2 = [['X1', 'Y1'], ['X1', 'Z1'], ['Y1', 'Z1']]
+    word_combinations_3 = [['X1', 'Y1', 'Z1'], ['Y1', 'Z1', 'Z2']]
+
+    if two_word_combinations:
+        generate_word_combinations(word_combinations_2, flag_train)
+
+    if three_word_combinations:
+        generate_word_combinations(word_combinations_3, flag_train)
 
 
 def load_train_test_data(input_file_path, col_names):
@@ -266,11 +264,14 @@ def window_sampling(main_df, window_length, window_overlap):
 
 
 def feature_sum(vec_list):
+    vec_list = np.array(vec_list)
     vec_sum = vec_list[0]
-
-    for idx in range(1, len(vec_list)):
-        vec_sum += vec_list[idx]
-
+    try:
+        for idx in range(1, len(vec_list)):
+            vec_sum += vec_list[idx]
+    except:
+        print(vec_list)
+        exit()
     return vec_sum.tolist()
 
 
@@ -329,7 +330,7 @@ if __name__ == '__main__':
     pooling_size = int(sys.argv[2])
     cluster_cnts = int(sys.argv[3])
     window_length = 16
-    window_overlap = 8
+    window_overlap = 16
 
     train_file_path = os.getcwd() + f'/../../data/output_csv/processed_data_train.csv'
     test_file_path = os.getcwd() + f'/../../data/output_csv/processed_data_test.csv'
