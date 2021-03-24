@@ -126,7 +126,7 @@ def perform_clustering(statistics_train, statistics_test, channels, cluster_cnts
     # writing test documents to text files
     write_clustering_output(sensory_words_testdf.columns[2:])
 
-    print(f'Finished generate_subsequences_uci_har  : {cluster_cnts} ')
+    print(f'Finished clustering  : {cluster_cnts} ')
 
 
 def stop_words_generation(channels):
@@ -212,15 +212,20 @@ def generate_word_combinations(word_combinations, flag_train):
 
 def new_words_generation(channels, flag_train=False):
 
-    two_word_combinations, three_word_combinations = True, True
+    two_word_combinations, three_word_combinations, four_word_combinations = True, True, True
     word_combinations_2 = [['X1', 'Y1'], ['X1', 'Z1'], ['Y1', 'Z1']]
     word_combinations_3 = [['X1', 'Y1', 'Z1'], ['Y1', 'Z1', 'Z2']]
+    word_combinations_4 = [['X1', 'Y1', 'Y2', 'Z2'], ['Y1', 'Z1', 'X2', 'Z2'], [
+        'X1', 'Y1', 'X2', 'Z2'], ['X1', 'Z1', 'Y2', 'Z2']]
 
     if two_word_combinations:
         generate_word_combinations(word_combinations_2, flag_train)
 
     if three_word_combinations:
         generate_word_combinations(word_combinations_3, flag_train)
+
+    if four_word_combinations:
+        generate_word_combinations(word_combinations_4, flag_train)
 
 
 def load_train_test_data(input_file_path, col_names):
