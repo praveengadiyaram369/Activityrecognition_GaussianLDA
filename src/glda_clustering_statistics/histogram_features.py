@@ -186,7 +186,7 @@ def form_words(row, flag_train=False):
     if flag_train:
         dict_key = ''.join(temp)
 
-        for idx in range(len(words_embedding_dict[temp[0]])):
+        for _ in range(len(words_embedding_dict[temp[0]])):
             vec_list = []
             for val in temp:
                 vec_list.append(words_embedding_dict[val])
@@ -198,9 +198,9 @@ def form_words(row, flag_train=False):
 
 def generate_word_combinations(word_combinations, flag_train):
 
-    for idx, combinations in enumerate(word_combinations):
-        acc_axis = combinations[0]
-        temp = combinations[1:]
+    for combinations in word_combinations:
+        #acc_axis = combinations[0]
+        #temp = combinations[1:]
         new_channel_key = ''.join(combinations)
         if flag_train:
             sensory_words_traindf[new_channel_key] = sensory_words_traindf[combinations].apply(
@@ -212,11 +212,14 @@ def generate_word_combinations(word_combinations, flag_train):
 
 def new_words_generation(channels, flag_train=False):
 
-    two_word_combinations, three_word_combinations, four_word_combinations = False, False, True
+    two_word_combinations, three_word_combinations, four_word_combinations, five_word_combinations, six_word_combinations = False, False, True, True, False
     word_combinations_2 = [['X1', 'Y1'], ['X1', 'Z1'], ['Y1', 'Z1']]
     word_combinations_3 = [['X1', 'Y1', 'Z1'], ['Y1', 'Z1', 'Z2']]
     word_combinations_4 = [['X1', 'Y1', 'Y2', 'Z2'], ['Y1', 'Z1', 'X2', 'Z2'], [
         'X1', 'Y1', 'X2', 'Z2'], ['X1', 'Z1', 'Y2', 'Z2']]
+    word_combinations_5 = [['X1', 'Y1', 'Z1', 'Y2', 'Z2'], ['X1', 'Y1', 'Z1', 'X2', 'Z2'], [
+        'X1', 'Y1', 'Z1', 'X2', 'Z2'], ['X1', 'Y1', 'Z1', 'Y2', 'Z2']]
+    word_combinations_6 = [['X1', 'Y1', 'Z1', 'X2', 'Y2', 'Z2']]
 
     if two_word_combinations:
         generate_word_combinations(word_combinations_2, flag_train)
@@ -226,6 +229,12 @@ def new_words_generation(channels, flag_train=False):
 
     if four_word_combinations:
         generate_word_combinations(word_combinations_4, flag_train)
+    
+    if five_word_combinations:
+        generate_word_combinations(word_combinations_5, flag_train)
+
+    if six_word_combinations:
+        generate_word_combinations(word_combinations_6, flag_train)
 
 
 def load_train_test_data(input_file_path, col_names):
