@@ -212,7 +212,7 @@ def generate_word_combinations(word_combinations, flag_train):
 
 def new_words_generation(channels, flag_train=False):
 
-    two_word_combinations, three_word_combinations, four_word_combinations = True, True, True
+    two_word_combinations, three_word_combinations, four_word_combinations = False, False, True
     word_combinations_2 = [['X1', 'Y1'], ['X1', 'Z1'], ['Y1', 'Z1']]
     word_combinations_3 = [['X1', 'Y1', 'Z1'], ['Y1', 'Z1', 'Z2']]
     word_combinations_4 = [['X1', 'Y1', 'Y2', 'Z2'], ['Y1', 'Z1', 'X2', 'Z2'], [
