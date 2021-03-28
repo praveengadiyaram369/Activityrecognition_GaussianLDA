@@ -103,6 +103,10 @@ def perform_clustering(statistics_train, statistics_test, channels, cluster_cnts
             words_embedding_dict[cluster_names[j]
                                  ] = cluster_stats.values[0].tolist()
 
+    replace_leastidf_flag = True
+    if replace_leastidf_flag:
+        replace_leastidf_values()
+
     # stop words generation
     stop_words_generation(channels)
     if words_generation_flag:
@@ -212,11 +216,11 @@ def generate_word_combinations(word_combinations, flag_train):
 
 def new_words_generation(channels, flag_train=False):
 
-    two_word_combinations, three_word_combinations, four_word_combinations, five_word_combinations, six_word_combinations = False, False, True, True, False
+    two_word_combinations, three_word_combinations, four_word_combinations, five_word_combinations, six_word_combinations = False, False, True, False, False
     word_combinations_2 = [['X1', 'Y1'], ['X1', 'Z1'], ['Y1', 'Z1']]
     word_combinations_3 = [['X1', 'Y1', 'Z1'], ['Y1', 'Z1', 'Z2']]
-    word_combinations_4 = [['X1', 'Y1', 'Y2', 'Z2'], ['Y1', 'Z1', 'X2', 'Z2'], [
-        'X1', 'Y1', 'X2', 'Z2'], ['X1', 'Z1', 'Y2', 'Z2']]
+    word_combinations_4 = [['X1', 'Y1', 'Y2', 'Z2'], ['X1', 'Z1', 'X2', 'Y2'], ['Y1', 'Z1', 'X2', 'Z2'], [
+        'X1', 'Y1', 'X2', 'Z2'], ['X1', 'Z1', 'Y2', 'Z2'], ['Y1', 'Z1', 'X2', 'Y2']]
     word_combinations_5 = [['X1', 'Y1', 'Z1', 'Y2', 'Z2'], ['X1', 'Y1', 'Z1', 'X2', 'Z2'], [
         'X1', 'Y1', 'Z1', 'X2', 'Z2'], ['X1', 'Y1', 'Z1', 'Y2', 'Z2']]
     word_combinations_6 = [['X1', 'Y1', 'Z1', 'X2', 'Y2', 'Z2']]
@@ -229,12 +233,39 @@ def new_words_generation(channels, flag_train=False):
 
     if four_word_combinations:
         generate_word_combinations(word_combinations_4, flag_train)
-    
+
     if five_word_combinations:
         generate_word_combinations(word_combinations_5, flag_train)
 
     if six_word_combinations:
         generate_word_combinations(word_combinations_6, flag_train)
+
+
+def get_replacement_word(channel_values, replaceword):
+
+    if channel_values[1] == replaceword:
+        return channel_values[0]
+    return channel_values[1]
+
+
+def replace_leastidf_values():
+
+    Y2_least_idf = collections.Counter(
+        sensory_words_traindf['Y2'].tolist()).most_common()[0][0]
+    Z2_least_idf = collections.Counter(
+        sensory_words_traindf['Z2'].tolist()).most_common()[0][0]
+
+    sensory_words_traindf['Y2'] = sensory_words_traindf[['Y1', 'Y2']].apply(
+        lambda row: get_replacement_word(row.values, Y2_least_idf), axis=1)
+
+    sensory_words_traindf['Z2'] = sensory_words_traindf[['Z1', 'Z2']].apply(
+        lambda row: get_replacement_word(row.values, Z2_least_idf), axis=1)
+
+    sensory_words_testdf['Y2'] = sensory_words_testdf[['Y1', 'Y2']].apply(
+        lambda row: get_replacement_word(row.values, Y2_least_idf), axis=1)
+
+    sensory_words_testdf['Z2'] = sensory_words_testdf[['Z1', 'Z2']].apply(
+        lambda row: get_replacement_word(row.values, Z2_least_idf), axis=1)
 
 
 def load_train_test_data(input_file_path, col_names):
