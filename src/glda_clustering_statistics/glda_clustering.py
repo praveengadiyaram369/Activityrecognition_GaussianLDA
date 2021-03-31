@@ -86,7 +86,7 @@ if __name__ == "__main__":
     )
     print(f'Starting glda clustering training : {cluster_cnts} ')
     # Set training running
-    trainer.sample(10)
+    trainer.sample(50)
 
     activity_topic_mapping = get_activity_topic_mapping(
         list(set(activity_labels)), activity_doc_count_index)
