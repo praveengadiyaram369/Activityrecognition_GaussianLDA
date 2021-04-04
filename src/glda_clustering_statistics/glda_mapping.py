@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 
 import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import Normalizer
 
 
 def transform_data(data):
@@ -54,12 +56,25 @@ def topic_doc_mapping(topic_doc_counts_df):
     return mapping_dict
 
 
+def cluster_gldaoutput(data):
+
+    data = np.transpose(np.array(data))
+    data = Normalizer().fit_transform(data)
+
+    model = KMeans(n_clusters=6, random_state=234).fit(data)
+    cluster_ids = model.predict(data)
+    one_hot_mapping = pd.get_dummies(cluster_ids.astype('str'))
+
+    return np.transpose(one_hot_mapping.values)
+
+
 def get_activity_topic_mapping(activity_labels, activity_doc_count_index):
 
     with open("saved_model/table_counts_per_doc.pkl", "rb") as doc:
         data = pickle.load(doc)
 
     activity_count = []
+    # data = cluster_gldaoutput(data)
     data = transform_data(data)
 
     for activity in activity_labels:
