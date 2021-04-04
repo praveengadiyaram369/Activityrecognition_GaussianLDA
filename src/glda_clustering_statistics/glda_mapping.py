@@ -65,7 +65,7 @@ def cluster_gldaoutput(data):
     cluster_ids = model.predict(data)
     one_hot_mapping = pd.get_dummies(cluster_ids.astype('str'))
 
-    return np.transpose(one_hot_mapping.values)
+    return np.transpose(one_hot_mapping.values), model
 
 
 def get_activity_topic_mapping(activity_labels, activity_doc_count_index):
@@ -74,7 +74,7 @@ def get_activity_topic_mapping(activity_labels, activity_doc_count_index):
         data = pickle.load(doc)
 
     activity_count = []
-    # data = cluster_gldaoutput(data)
+    # data, kmeans_model  = cluster_gldaoutput(data)
     data = transform_data(data)
 
     for activity in activity_labels:

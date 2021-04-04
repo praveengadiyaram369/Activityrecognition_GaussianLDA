@@ -46,6 +46,18 @@ def get_mode(test_topics):
     counter = Counter(test_topics)
     return counter.most_common()[0][0]
 
+def get_kmeanscluster(test_topics, kmeans_model):
+
+    counter = Counter(test_topics)
+    counter_dict = dict(counter)
+    topic_dist = np.zeros(6)
+    for topic, distribution in counter_dict.items():
+        topic_dist[topic] = distribution
+    
+    div_norm = sum(topic_dist)
+    topic_dist = np.divide(topic_dist, div_norm)
+    
+    return kmeans_model.predict(topic_dist.reshape(1, 6))
 
 if __name__ == "__main__":
 
@@ -81,12 +93,12 @@ if __name__ == "__main__":
     num_topics = len(set(activity_labels))
 
     # Prepare a trainer
-    trainer = GaussianLDAAliasTrainer(
-        corpus, embeddings, vocab, num_topics, alpha, save_path=output_dir, kappa=0.3
-    )
-    print(f'Starting glda clustering training : {cluster_cnts} ')
-    # Set training running
-    trainer.sample(50)
+    # trainer = GaussianLDAAliasTrainer(
+    #     corpus, embeddings, vocab, num_topics, alpha, save_path=output_dir, kappa=0.3
+    # )
+    # print(f'Starting glda clustering training : {cluster_cnts} ')
+    # # Set training running
+    # trainer.sample(50)
 
     activity_topic_mapping = get_activity_topic_mapping(
         list(set(activity_labels)), activity_doc_count_index)
