@@ -12,7 +12,6 @@ from sklearn.preprocessing import Normalizer
 from scipy import stats
 import statistics
 
-
 sensory_words_traindf = pd.DataFrame()
 sensory_words_testdf = pd.DataFrame()
 words_embedding_dict = {}
@@ -103,7 +102,7 @@ def perform_clustering(statistics_train, statistics_test, channels, cluster_cnts
             words_embedding_dict[cluster_names[j]
                                  ] = cluster_stats.values[0].tolist()
 
-    replace_leastidf_flag = True
+    replace_leastidf_flag = False
     if replace_leastidf_flag:
         replace_leastidf_values()
 
@@ -216,7 +215,7 @@ def generate_word_combinations(word_combinations, flag_train):
 
 def new_words_generation(channels, flag_train=False):
 
-    two_word_combinations, three_word_combinations, four_word_combinations, five_word_combinations, six_word_combinations = False, False, True, False, False
+    two_word_combinations, three_word_combinations, four_word_combinations, five_word_combinations, six_word_combinations = False, True, True, True, True
     word_combinations_2 = [['X1', 'Y1'], ['X1', 'Z1'], ['Y1', 'Z1']]
     word_combinations_3 = [['X1', 'Y1', 'Z1'], ['Y1', 'Z1', 'Z2']]
     word_combinations_4 = [['X1', 'Y1', 'Y2', 'Z2'], ['X1', 'Z1', 'X2', 'Y2'], ['Y1', 'Z1', 'X2', 'Z2'], [
@@ -258,14 +257,14 @@ def replace_leastidf_values():
     sensory_words_traindf['Y2'] = sensory_words_traindf[['Y1', 'Y2']].apply(
         lambda row: get_replacement_word(row.values, Y2_least_idf), axis=1)
 
-    sensory_words_traindf['Z2'] = sensory_words_traindf[['Z1', 'Z2']].apply(
-        lambda row: get_replacement_word(row.values, Z2_least_idf), axis=1)
+    # sensory_words_traindf['Z2'] = sensory_words_traindf[['Z1', 'Z2']].apply(
+    #     lambda row: get_replacement_word(row.values, Z2_least_idf), axis=1)
 
     sensory_words_testdf['Y2'] = sensory_words_testdf[['Y1', 'Y2']].apply(
         lambda row: get_replacement_word(row.values, Y2_least_idf), axis=1)
 
-    sensory_words_testdf['Z2'] = sensory_words_testdf[['Z1', 'Z2']].apply(
-        lambda row: get_replacement_word(row.values, Z2_least_idf), axis=1)
+    # sensory_words_testdf['Z2'] = sensory_words_testdf[['Z1', 'Z2']].apply(
+    #     lambda row: get_replacement_word(row.values, Z2_least_idf), axis=1)
 
 
 def load_train_test_data(input_file_path, col_names):
