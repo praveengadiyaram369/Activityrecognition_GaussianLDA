@@ -1,0 +1,20 @@
+name: glda
+channels:
+  - defaults
+dependencies:
+  - python=3.7.6
+  - pip
+  - git
+  - numpy
+  - scikit-learn
+  - jupyter
+  - matplotlib
+  - Cython
+  - scipy
+  - pandas
+  - tqdm
+  - gensim
+  - pip:
+    - "--editable=git+https://github.com/modusdatascience/choldate.git#egg=choldate"
+    - "--editable=git+https://github.com/praveengadiyaram369/gaussianlda.git@topic_dist_per_doc#egg=gaussianlda"
+prefix: /Users/srisaipraveengadiyaram/opt/anaconda3/envs/glda

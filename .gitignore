@@ -148,3 +148,5 @@ data/UCI HAR Dataset
 data/documents/train
 data/documents/test
 data/sub_sequence_output/word_embeddings_from_clusters.txt
+src/choldate
+src/gaussianlda
