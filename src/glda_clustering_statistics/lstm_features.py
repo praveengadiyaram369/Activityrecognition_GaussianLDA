@@ -9,6 +9,8 @@ import pandas as pd
 import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import Normalizer
+from sklearn import svm, metrics
+from sklearn.ensemble import RandomForestClassifier
 from scipy import stats
 import statistics
 
@@ -293,6 +295,78 @@ def get_kmeans_clusters(sub_sequence_train, sub_sequence_test, feature_dim):
 
     return one_hot_features_train.values.tolist(), one_hot_features_test.values.tolist()
 
+def perform_svm_clf(features_train, features_test, subject_activity_data_train, subject_activity_data_test):
+
+    print(features_train.shape)
+    print(features_test.shape)
+    print(subject_activity_data_train.shape)
+    print(subject_activity_data_test.shape)
+
+    step_cnt = 15
+    train_label_cnt = 7352
+    test_label_cnt = 2947
+
+    X_train = []
+    y_train = []
+    X_test = []
+    y_test = []
+
+    for idx in range(train_label_cnt):
+        class_label = int(subject_activity_data_train[(idx-1)*step_cnt][1])
+        y_train.append(class_label)
+
+        lower_lim = idx*step_cnt
+        upper_lim = ((idx+1)*step_cnt)
+        temp = []
+
+        for val in range(6):
+            temp.append(features_train[val,lower_lim:upper_lim,:])
+
+        X_train.append(temp)
+
+    for idx in range(test_label_cnt):
+        class_label = int(subject_activity_data_test[(idx-1)*step_cnt][1])
+        y_test.append(class_label)
+
+        lower_lim = idx*step_cnt
+        upper_lim = ((idx+1)*step_cnt)
+        temp = []
+
+        for val in range(6):
+            temp.append(features_test[val,lower_lim:upper_lim,:])
+
+        X_test.append(temp)
+
+    feature_dim = (4*15*6)
+    X_train = np.array(X_train)
+    y_train = np.array(y_train)
+    X_test = np.array(X_test)
+    y_test = np.array(y_test)
+
+    print(X_train.shape)
+    print(X_test.shape)
+    print(y_train.shape)
+    print(y_test.shape)
+
+    X_train = X_train.reshape(-1,feature_dim).astype('float32')
+    y_train = y_train.reshape(-1,1).astype('int32')
+    X_test = X_test.reshape(-1,feature_dim).astype('float32')
+    y_test = y_test.reshape(-1,1).astype('int32')
+
+    assert X_train.shape[0] == y_train.shape[0]
+    assert X_test.shape[0] == y_test.shape[0]
+
+    X_train = Normalizer().fit_transform(X_train)
+    X_test = Normalizer().fit_transform(X_test)
+
+    model = svm.SVC(kernel='poly').fit(X_train, y_train)
+
+    preds = model.predict(X_test)
+
+    svm_f1score = metrics.f1_score(y_test, preds, average='macro') * 100
+
+    print(f'svm linear classifier model f1-score on lstm features: {svm_f1score}')
+
 
 if __name__ == '__main__':
 
@@ -323,6 +397,9 @@ if __name__ == '__main__':
     features_train = sensor_features_train.reshape(6, train_channel_len, 4)
     features_test = sensor_features_test.reshape(6, test_channel_len, 4)
 
+    perform_svm_clf(features_train, features_test, subject_activity_data_train, subject_activity_data_test)
+
+    exit()
     perform_clustering(features_train, features_test,
                        channels=col_names[2:], cluster_cnts=cluster_cnts, words_generation_flag=True)
 
