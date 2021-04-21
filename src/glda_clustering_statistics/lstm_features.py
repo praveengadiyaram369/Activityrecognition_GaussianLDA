@@ -84,6 +84,62 @@ def cluster_word_sort(axis_clusters, cluster_names):
 
     return result.iloc[:, 1:]
 
+def get_feature_vector_fromwords(instance_words):
+
+    feature_vector = []
+    for line in instance_words:
+        for word in line:
+            feature_vector.append(words_embedding_dict[word])
+
+    return np.array(feature_vector).reshape(-1, 1)
+
+def get_feature_data(main_df):
+
+    activity_subject_df_train = main_df[['activityID', 'subject_id']].drop_duplicates().values.astype('int32')
+
+    X = []
+    y = []
+
+    for instance in activity_subject_df_train:
+        activity = instance[0]
+        subject = instance[1]
+        instance_data = main_df.loc[(main_df['subject_id'] == subject) & (main_df['activityID'] == activity)]
+        instance_words = instance_data[col_names[2:]].values
+        instance_feature_vector = get_feature_vector_fromwords(instance_words)
+
+        X.append(instance_feature_vector)
+        y.append(activity)
+
+    return np.array(X), np.array(y)
+
+def perfom_svm_wordembds():
+
+    X_train, y_train = get_feature_data(sensory_words_traindf)
+    X_test, y_test = get_feature_data(sensory_words_testdf)
+
+    X_train = X_train.reshape(X_train.shape[0], X_train.shape[1]).astype('float32')
+    y_train = y_train.astype('int32')
+    X_test = X_test.reshape(X_test.shape[0], X_test.shape[1]).astype('float32')
+    y_test = y_test.astype('int32')
+
+    print(X_train.shape)
+    print(y_train.shape)
+    print(X_test.shape)
+    print(y_test.shape)
+
+    assert X_train.shape[0] == y_train.shape[0]
+    assert X_test.shape[0] == y_test.shape[0]
+
+    X_train = Normalizer().fit_transform(X_train)
+    X_test = Normalizer().fit_transform(X_test)
+
+    model = svm.SVC(kernel='poly').fit(X_train, y_train)
+
+    preds = model.predict(X_test)
+
+    svm_f1score = metrics.f1_score(y_test, preds, average='macro') * 100
+
+    print(f'svm linear classifier model f1-score on lstm features: {svm_f1score}')
 
 def perform_clustering(statistics_train, statistics_test, channels, cluster_cnts, words_generation_flag=False):
 
@@ -103,6 +159,9 @@ def perform_clustering(statistics_train, statistics_test, channels, cluster_cnts
             centroid_statistic.append(cluster_stats)
             words_embedding_dict[cluster_names[j]
                                  ] = cluster_stats.values[0].tolist()
+
+    perfom_svm_wordembds()
+    exit()
 
     replace_leastidf_flag = False
     if replace_leastidf_flag:
@@ -302,7 +361,7 @@ def perform_svm_clf(features_train, features_test, subject_activity_data_train, 
     print(subject_activity_data_train.shape)
     print(subject_activity_data_test.shape)
 
-    step_cnt = 15
+    step_cnt = 8
     train_label_cnt = 7352
     test_label_cnt = 2947
 
@@ -312,7 +371,7 @@ def perform_svm_clf(features_train, features_test, subject_activity_data_train, 
     y_test = []
 
     for idx in range(train_label_cnt):
-        class_label = int(subject_activity_data_train[(idx-1)*step_cnt][1])
+        class_label = subject_activity_data_train[idx*step_cnt][1]
         y_train.append(class_label)
 
         lower_lim = idx*step_cnt
@@ -325,7 +384,7 @@ def perform_svm_clf(features_train, features_test, subject_activity_data_train, 
         X_train.append(temp)
 
     for idx in range(test_label_cnt):
-        class_label = int(subject_activity_data_test[(idx-1)*step_cnt][1])
+        class_label = subject_activity_data_test[idx*step_cnt][1]
         y_test.append(class_label)
 
         lower_lim = idx*step_cnt
@@ -337,21 +396,11 @@ def perform_svm_clf(features_train, features_test, subject_activity_data_train, 
 
         X_test.append(temp)
 
-    feature_dim = (4*15*6)
-    X_train = np.array(X_train)
-    y_train = np.array(y_train)
-    X_test = np.array(X_test)
-    y_test = np.array(y_test)
-
-    print(X_train.shape)
-    print(X_test.shape)
-    print(y_train.shape)
-    print(y_test.shape)
-
-    X_train = X_train.reshape(-1,feature_dim).astype('float32')
-    y_train = y_train.reshape(-1,1).astype('int32')
-    X_test = X_test.reshape(-1,feature_dim).astype('float32')
-    y_test = y_test.reshape(-1,1).astype('int32')
+    feature_dim = (4*8*6)
+    X_train = np.array(X_train).reshape(-1,feature_dim).astype('float32')
+    y_train = np.array(y_train).astype('int32')
+    X_test = np.array(X_test).reshape(-1,feature_dim).astype('float32')
+    y_test = np.array(y_test).astype('int32')
 
     assert X_train.shape[0] == y_train.shape[0]
     assert X_test.shape[0] == y_test.shape[0]
@@ -359,7 +408,7 @@ def perform_svm_clf(features_train, features_test, subject_activity_data_train, 
     X_train = Normalizer().fit_transform(X_train)
     X_test = Normalizer().fit_transform(X_test)
 
-    model = svm.SVC(kernel='poly').fit(X_train, y_train)
+    model = svm.SVC(kernel='linear').fit(X_train, y_train)
 
     preds = model.predict(X_test)
 
@@ -397,9 +446,8 @@ if __name__ == '__main__':
     features_train = sensor_features_train.reshape(6, train_channel_len, 4)
     features_test = sensor_features_test.reshape(6, test_channel_len, 4)
 
-    perform_svm_clf(features_train, features_test, subject_activity_data_train, subject_activity_data_test)
+    #perform_svm_clf(features_train, features_test, subject_activity_data_train, subject_activity_data_test)
 
-    exit()
     perform_clustering(features_train, features_test,
                        channels=col_names[2:], cluster_cnts=cluster_cnts, words_generation_flag=True)
 
