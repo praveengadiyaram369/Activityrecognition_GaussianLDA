@@ -91,7 +91,7 @@ def get_feature_vector_fromwords(instance_words):
         for word in line:
             feature_vector.append(words_embedding_dict[word])
 
-    return np.array(feature_vector).reshape(-1, 1)
+    return feature_vector
 
 def get_feature_data(main_df):
 
@@ -107,9 +107,10 @@ def get_feature_data(main_df):
         instance_words = instance_data[col_names[2:]].values
         instance_feature_vector = get_feature_vector_fromwords(instance_words)
 
-        X.append(instance_feature_vector)
+        X_avg = mean_feature_sum(instance_feature_vector)
+        X.append(np.array(X_avg).reshape(-1, 1))
         y.append(activity)
-
+    
     return np.array(X), np.array(y)
 
 def perfom_svm_wordembds():
@@ -133,7 +134,7 @@ def perfom_svm_wordembds():
     X_train = Normalizer().fit_transform(X_train)
     X_test = Normalizer().fit_transform(X_test)
 
-    model = svm.SVC(kernel='poly').fit(X_train, y_train)
+    model = svm.SVC(kernel='linear').fit(X_train, y_train)
 
     preds = model.predict(X_test)
 
@@ -339,6 +340,12 @@ def feature_sum(vec_list):
         exit()
     return vec_sum.tolist()
 
+def mean_feature_sum(vec_list):
+    n = len(vec_list)
+    vec_list_sum = np.array(feature_sum(vec_list))
+    vec_list_sum = vec_list_sum/n
+    return vec_list_sum.tolist()
+
 
 def get_kmeans_clusters(sub_sequence_train, sub_sequence_test, feature_dim):
 
@@ -379,9 +386,9 @@ def perform_svm_clf(features_train, features_test, subject_activity_data_train, 
         temp = []
 
         for val in range(6):
-            temp.append(features_train[val,lower_lim:upper_lim,:])
+            temp.append(mean_feature_sum(features_train[val,lower_lim:upper_lim,:]))
 
-        X_train.append(temp)
+        X_train.append(mean_feature_sum(temp))
 
     for idx in range(test_label_cnt):
         class_label = subject_activity_data_test[idx*step_cnt][1]
@@ -392,15 +399,20 @@ def perform_svm_clf(features_train, features_test, subject_activity_data_train, 
         temp = []
 
         for val in range(6):
-            temp.append(features_test[val,lower_lim:upper_lim,:])
+            temp.append(mean_feature_sum(features_test[val,lower_lim:upper_lim,:]))
 
-        X_test.append(temp)
+        X_test.append(mean_feature_sum(temp))
 
-    feature_dim = (4*8*6)
+    feature_dim = 4
     X_train = np.array(X_train).reshape(-1,feature_dim).astype('float32')
     y_train = np.array(y_train).astype('int32')
     X_test = np.array(X_test).reshape(-1,feature_dim).astype('float32')
     y_test = np.array(y_test).astype('int32')
+
+    print(X_train.shape)
+    print(y_train.shape)
+    print(X_test.shape)
+    print(y_test.shape)
 
     assert X_train.shape[0] == y_train.shape[0]
     assert X_test.shape[0] == y_test.shape[0]
@@ -415,6 +427,8 @@ def perform_svm_clf(features_train, features_test, subject_activity_data_train, 
     svm_f1score = metrics.f1_score(y_test, preds, average='macro') * 100
 
     print(f'svm linear classifier model f1-score on lstm features: {svm_f1score}')
+
+    exit()
 
 
 if __name__ == '__main__':
