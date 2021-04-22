@@ -18,9 +18,22 @@ sensory_words_traindf = pd.DataFrame()
 sensory_words_testdf = pd.DataFrame()
 words_embedding_dict = {}
 
+def get_svmf1_score(X_train, y_train, X_test, y_test):
+
+    assert X_train.shape[0] == y_train.shape[0]
+    assert X_test.shape[0] == y_test.shape[0]
+
+    X_train = Normalizer().fit_transform(X_train)
+    X_test = Normalizer().fit_transform(X_test)
+
+    model = svm.SVC(kernel='poly').fit(X_train, y_train)
+    preds = model.predict(X_test)
+    svm_f1score = metrics.f1_score(y_test, preds, average='macro') * 100
+
+    print(f'svm linear classifier model f1-score on lstm features: {svm_f1score} \n')
+
+
 # assigning words for each cluster
-
-
 def get_assigned_words(seq_clusters, cluster_words, axis, flag_train=False):
 
     # _assign word to each cluster of the subsequence usnig numpy where function
@@ -115,6 +128,8 @@ def get_feature_data(main_df):
 
 def perfom_svm_wordembds():
 
+    print('performing svm after clustering.........')
+
     X_train, y_train = get_feature_data(sensory_words_traindf)
     X_test, y_test = get_feature_data(sensory_words_testdf)
 
@@ -123,24 +138,9 @@ def perfom_svm_wordembds():
     X_test = X_test.reshape(X_test.shape[0], X_test.shape[1]).astype('float32')
     y_test = y_test.astype('int32')
 
-    print(X_train.shape)
-    print(y_train.shape)
-    print(X_test.shape)
-    print(y_test.shape)
+    get_svmf1_score(X_train, y_train, X_test, y_test)
 
-    assert X_train.shape[0] == y_train.shape[0]
-    assert X_test.shape[0] == y_test.shape[0]
 
-    X_train = Normalizer().fit_transform(X_train)
-    X_test = Normalizer().fit_transform(X_test)
-
-    model = svm.SVC(kernel='linear').fit(X_train, y_train)
-
-    preds = model.predict(X_test)
-
-    svm_f1score = metrics.f1_score(y_test, preds, average='macro') * 100
-
-    print(f'svm linear classifier model f1-score on lstm features: {svm_f1score}')
 
 def perform_clustering(statistics_train, statistics_test, channels, cluster_cnts, words_generation_flag=False):
 
@@ -361,74 +361,45 @@ def get_kmeans_clusters(sub_sequence_train, sub_sequence_test, feature_dim):
 
     return one_hot_features_train.values.tolist(), one_hot_features_test.values.tolist()
 
+
+def extract_feature_info_lstmdata(label_cnt, step_cnt, features, subject_activity_data):
+
+    X = []
+    y = []
+
+    for idx in range(label_cnt):
+        class_label = subject_activity_data[idx*step_cnt][1]
+        y.append(class_label)
+
+        lower_lim = idx*step_cnt
+        upper_lim = ((idx+1)*step_cnt)
+        temp = []
+
+        for val in range(6):
+            temp.append(mean_feature_sum(features[val,lower_lim:upper_lim,:]))
+
+        X.append(mean_feature_sum(temp))
+
+    return X, y
+
 def perform_svm_clf(features_train, features_test, subject_activity_data_train, subject_activity_data_test):
 
-    print(features_train.shape)
-    print(features_test.shape)
-    print(subject_activity_data_train.shape)
-    print(subject_activity_data_test.shape)
+    print('performing svm before clustering.........')
 
-    step_cnt = 8
     train_label_cnt = 7352
     test_label_cnt = 2947
+    feature_dim = features_train.shape[2]
+    step_cnt = int(features_train.shape[1]/train_label_cnt)
 
-    X_train = []
-    y_train = []
-    X_test = []
-    y_test = []
+    X_train, y_train = extract_feature_info_lstmdata(train_label_cnt, step_cnt, features_train, subject_activity_data_train)
+    X_test, y_test = extract_feature_info_lstmdata(test_label_cnt, step_cnt, features_test, subject_activity_data_test)
 
-    for idx in range(train_label_cnt):
-        class_label = subject_activity_data_train[idx*step_cnt][1]
-        y_train.append(class_label)
-
-        lower_lim = idx*step_cnt
-        upper_lim = ((idx+1)*step_cnt)
-        temp = []
-
-        for val in range(6):
-            temp.append(mean_feature_sum(features_train[val,lower_lim:upper_lim,:]))
-
-        X_train.append(mean_feature_sum(temp))
-
-    for idx in range(test_label_cnt):
-        class_label = subject_activity_data_test[idx*step_cnt][1]
-        y_test.append(class_label)
-
-        lower_lim = idx*step_cnt
-        upper_lim = ((idx+1)*step_cnt)
-        temp = []
-
-        for val in range(6):
-            temp.append(mean_feature_sum(features_test[val,lower_lim:upper_lim,:]))
-
-        X_test.append(mean_feature_sum(temp))
-
-    feature_dim = 4
     X_train = np.array(X_train).reshape(-1,feature_dim).astype('float32')
     y_train = np.array(y_train).astype('int32')
     X_test = np.array(X_test).reshape(-1,feature_dim).astype('float32')
     y_test = np.array(y_test).astype('int32')
 
-    print(X_train.shape)
-    print(y_train.shape)
-    print(X_test.shape)
-    print(y_test.shape)
-
-    assert X_train.shape[0] == y_train.shape[0]
-    assert X_test.shape[0] == y_test.shape[0]
-
-    X_train = Normalizer().fit_transform(X_train)
-    X_test = Normalizer().fit_transform(X_test)
-
-    model = svm.SVC(kernel='linear').fit(X_train, y_train)
-
-    preds = model.predict(X_test)
-
-    svm_f1score = metrics.f1_score(y_test, preds, average='macro') * 100
-
-    print(f'svm linear classifier model f1-score on lstm features: {svm_f1score}')
-
-    exit()
+    get_svmf1_score(X_train, y_train, X_test, y_test)
 
 
 if __name__ == '__main__':
@@ -457,8 +428,8 @@ if __name__ == '__main__':
     train_channel_len = int(sensor_features_train.shape[0]/6)
     test_channel_len = int(sensor_features_test.shape[0]/6)
 
-    features_train = sensor_features_train.reshape(6, train_channel_len, 4)
-    features_test = sensor_features_test.reshape(6, test_channel_len, 4)
+    features_train = sensor_features_train.reshape(6, train_channel_len, 45)
+    features_test = sensor_features_test.reshape(6, test_channel_len, 45)
 
     #perform_svm_clf(features_train, features_test, subject_activity_data_train, subject_activity_data_test)
 
