@@ -14,24 +14,8 @@ from sklearn.ensemble import RandomForestClassifier
 from scipy import stats
 import statistics
 
-sensory_words_traindf = pd.DataFrame()
-sensory_words_testdf = pd.DataFrame()
-words_embedding_dict = {}
-
-def get_svmf1_score(X_train, y_train, X_test, y_test):
-
-    assert X_train.shape[0] == y_train.shape[0]
-    assert X_test.shape[0] == y_test.shape[0]
-
-    X_train = Normalizer().fit_transform(X_train)
-    X_test = Normalizer().fit_transform(X_test)
-
-    model = svm.SVC(kernel='poly').fit(X_train, y_train)
-    preds = model.predict(X_test)
-    svm_f1score = metrics.f1_score(y_test, preds, average='macro') * 100
-
-    print(f'svm linear classifier model f1-score on lstm features: {svm_f1score} \n')
-
+from global_settings import *
+from features_classification import perform_classification_on_features, perform_classification_on_rawfeatures
 
 # assigning words for each cluster
 def get_assigned_words(seq_clusters, cluster_words, axis, flag_train=False):
@@ -97,50 +81,6 @@ def cluster_word_sort(axis_clusters, cluster_names):
 
     return result.iloc[:, 1:]
 
-def get_feature_vector_fromwords(instance_words):
-
-    feature_vector = []
-    for line in instance_words:
-        for word in line:
-            feature_vector.append(words_embedding_dict[word])
-
-    return feature_vector
-
-def get_feature_data(main_df):
-
-    activity_subject_df_train = main_df[['activityID', 'subject_id']].drop_duplicates().values.astype('int32')
-
-    X = []
-    y = []
-
-    for instance in activity_subject_df_train:
-        activity = instance[0]
-        subject = instance[1]
-        instance_data = main_df.loc[(main_df['subject_id'] == subject) & (main_df['activityID'] == activity)]
-        instance_words = instance_data[col_names[2:]].values
-        instance_feature_vector = get_feature_vector_fromwords(instance_words)
-
-        X_avg = mean_feature_sum(instance_feature_vector)
-        X.append(np.array(X_avg).reshape(-1, 1))
-        y.append(activity)
-    
-    return np.array(X), np.array(y)
-
-def perfom_svm_wordembds():
-
-    print('performing svm after clustering.........')
-
-    X_train, y_train = get_feature_data(sensory_words_traindf)
-    X_test, y_test = get_feature_data(sensory_words_testdf)
-
-    X_train = X_train.reshape(X_train.shape[0], X_train.shape[1]).astype('float32')
-    y_train = y_train.astype('int32')
-    X_test = X_test.reshape(X_test.shape[0], X_test.shape[1]).astype('float32')
-    y_test = y_test.astype('int32')
-
-    get_svmf1_score(X_train, y_train, X_test, y_test)
-
-
 
 def perform_clustering(statistics_train, statistics_test, channels, cluster_cnts, words_generation_flag=False):
 
@@ -160,9 +100,6 @@ def perform_clustering(statistics_train, statistics_test, channels, cluster_cnts
             centroid_statistic.append(cluster_stats)
             words_embedding_dict[cluster_names[j]
                                  ] = cluster_stats.values[0].tolist()
-
-    perfom_svm_wordembds()
-    exit()
 
     replace_leastidf_flag = False
     if replace_leastidf_flag:
@@ -192,6 +129,8 @@ def perform_clustering(statistics_train, statistics_test, channels, cluster_cnts
     write_clustering_output(sensory_words_testdf.columns[2:])
 
     print(f'Finished clustering  : {cluster_cnts} ')
+
+    perform_classification_on_features()
 
 
 def stop_words_generation(channels):
@@ -277,9 +216,9 @@ def generate_word_combinations(word_combinations, flag_train):
 
 def new_words_generation(channels, flag_train=False):
 
-    two_word_combinations, three_word_combinations, four_word_combinations, five_word_combinations, six_word_combinations = False, True, True, True, True
-    word_combinations_2 = [['X1', 'Y1'], ['X1', 'Z1'], ['Y1', 'Z1']]
-    word_combinations_3 = [['X1', 'Y1', 'Z1'], ['Y1', 'Z1', 'Z2']]
+    two_word_combinations, three_word_combinations, four_word_combinations, five_word_combinations, six_word_combinations = False, True, True, True, False
+    word_combinations_2 = [['X1', 'Y1'], ['X1', 'Z1'], ['Y1', 'Z1'], ['X1', 'Y2'], ['X1', 'Z2'], ['Y1', 'X2'], ['Y1', 'Z2'], ['Z1', 'X2'], ['Z1', 'Y2']]
+    word_combinations_3 = [['X1', 'Y1', 'Z1'], ['X1', 'Y2', 'Z2'], ['Y1', 'X2', 'Z2'], ['Z1', 'X2', 'Y2']]
     word_combinations_4 = [['X1', 'Y1', 'Y2', 'Z2'], ['X1', 'Z1', 'X2', 'Y2'], ['Y1', 'Z1', 'X2', 'Z2'], [
         'X1', 'Y1', 'X2', 'Z2'], ['X1', 'Z1', 'Y2', 'Z2'], ['Y1', 'Z1', 'X2', 'Y2']]
     word_combinations_5 = [['X1', 'Y1', 'Z1', 'Y2', 'Z2'], ['X1', 'Y1', 'Z1', 'X2', 'Z2'], [
@@ -319,14 +258,14 @@ def replace_leastidf_values():
     sensory_words_traindf['Y2'] = sensory_words_traindf[['Y1', 'Y2']].apply(
         lambda row: get_replacement_word(row.values, Y2_least_idf), axis=1)
 
-    # sensory_words_traindf['Z2'] = sensory_words_traindf[['Z1', 'Z2']].apply(
-    #     lambda row: get_replacement_word(row.values, Z2_least_idf), axis=1)
+    sensory_words_traindf['Z2'] = sensory_words_traindf[['Z1', 'Z2']].apply(
+         lambda row: get_replacement_word(row.values, Z2_least_idf), axis=1)
 
     sensory_words_testdf['Y2'] = sensory_words_testdf[['Y1', 'Y2']].apply(
         lambda row: get_replacement_word(row.values, Y2_least_idf), axis=1)
 
-    # sensory_words_testdf['Z2'] = sensory_words_testdf[['Z1', 'Z2']].apply(
-    #     lambda row: get_replacement_word(row.values, Z2_least_idf), axis=1)
+    sensory_words_testdf['Z2'] = sensory_words_testdf[['Z1', 'Z2']].apply(
+         lambda row: get_replacement_word(row.values, Z2_least_idf), axis=1)
 
 
 def feature_sum(vec_list):
@@ -339,6 +278,7 @@ def feature_sum(vec_list):
         print(vec_list)
         exit()
     return vec_sum.tolist()
+
 
 def mean_feature_sum(vec_list):
     n = len(vec_list)
@@ -382,9 +322,8 @@ def extract_feature_info_lstmdata(label_cnt, step_cnt, features, subject_activit
 
     return X, y
 
-def perform_svm_clf(features_train, features_test, subject_activity_data_train, subject_activity_data_test):
 
-    print('performing svm before clustering.........')
+def perform_svm_clf(features_train, features_test, subject_activity_data_train, subject_activity_data_test):
 
     train_label_cnt = 7352
     test_label_cnt = 2947
@@ -399,7 +338,7 @@ def perform_svm_clf(features_train, features_test, subject_activity_data_train, 
     X_test = np.array(X_test).reshape(-1,feature_dim).astype('float32')
     y_test = np.array(y_test).astype('int32')
 
-    get_svmf1_score(X_train, y_train, X_test, y_test)
+    perform_classification_on_rawfeatures(X_train, y_train, X_test, y_test)
 
 
 if __name__ == '__main__':
@@ -427,11 +366,12 @@ if __name__ == '__main__':
 
     train_channel_len = int(sensor_features_train.shape[0]/6)
     test_channel_len = int(sensor_features_test.shape[0]/6)
+    feature_dim = sensor_features_train.shape[1]
 
-    features_train = sensor_features_train.reshape(6, train_channel_len, 45)
-    features_test = sensor_features_test.reshape(6, test_channel_len, 45)
+    features_train = sensor_features_train.reshape(6, train_channel_len, feature_dim)
+    features_test = sensor_features_test.reshape(6, test_channel_len, feature_dim)
 
-    #perform_svm_clf(features_train, features_test, subject_activity_data_train, subject_activity_data_test)
+    perform_svm_clf(features_train, features_test, subject_activity_data_train, subject_activity_data_test)
 
     perform_clustering(features_train, features_test,
                        channels=col_names[2:], cluster_cnts=cluster_cnts, words_generation_flag=True)

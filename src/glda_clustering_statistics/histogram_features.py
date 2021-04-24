@@ -12,13 +12,11 @@ from sklearn.preprocessing import Normalizer
 from scipy import stats
 import statistics
 
-sensory_words_traindf = pd.DataFrame()
-sensory_words_testdf = pd.DataFrame()
-words_embedding_dict = {}
+from global_settings import *
+from features_classification import perform_classification_on_features, perform_classification_on_rawfeatures
+
 
 # assigning words for each cluster
-
-
 def get_assigned_words(seq_clusters, cluster_words, axis, flag_train=False):
 
     # _assign word to each cluster of the subsequence usnig numpy where function
@@ -130,6 +128,8 @@ def perform_clustering(statistics_train, statistics_test, channels, cluster_cnts
     write_clustering_output(sensory_words_testdf.columns[2:])
 
     print(f'Finished clustering  : {cluster_cnts} ')
+
+    perform_classification_on_features()
 
 
 def stop_words_generation(channels):
