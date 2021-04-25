@@ -323,7 +323,7 @@ def extract_feature_info_lstmdata(label_cnt, step_cnt, features, subject_activit
     return X, y
 
 
-def perform_svm_clf(features_train, features_test, subject_activity_data_train, subject_activity_data_test):
+def perform_clf(features_train, features_test, subject_activity_data_train, subject_activity_data_test):
 
     train_label_cnt = 7352
     test_label_cnt = 2947
@@ -371,7 +371,7 @@ if __name__ == '__main__':
     features_train = sensor_features_train.reshape(6, train_channel_len, feature_dim)
     features_test = sensor_features_test.reshape(6, test_channel_len, feature_dim)
 
-    perform_svm_clf(features_train, features_test, subject_activity_data_train, subject_activity_data_test)
+    perform_clf(features_train, features_test, subject_activity_data_train, subject_activity_data_test)
 
     perform_clustering(features_train, features_test,
                        channels=col_names[2:], cluster_cnts=cluster_cnts, words_generation_flag=True)

@@ -88,15 +88,15 @@ def load_data():
 
 def get_svm_wordembds():
 
-    print('................ svm clustering.........')
+    print('................ svm classfier .........')
 
-    model = svm.SVC(kernel='linear')
+    model = svm.SVC(kernel='poly')
     return model
 
 
 def get_rfc_wordembds():
 
-    print('................ rfc clustering.........')
+    print('................ rfc classifer .........')
 
     model = RandomForestClassifier(n_estimators=200)
     return model
