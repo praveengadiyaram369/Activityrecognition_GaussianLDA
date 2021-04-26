@@ -99,6 +99,8 @@ def get_rfc_wordembds():
     print('................ rfc classifer .........')
 
     model = RandomForestClassifier(n_estimators=200)
+    #model = RandomForestClassifier(n_estimators=450,criterion='entropy', max_depth=20, min_samples_split=6, min_samples_leaf=2, max_features='log2', bootstrap=True , n_jobs=-1, random_state=123)
+
     return model
 
 
