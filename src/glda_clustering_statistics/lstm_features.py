@@ -130,7 +130,7 @@ def perform_clustering(statistics_train, statistics_test, channels, cluster_cnts
 
     print(f'Finished clustering  : {cluster_cnts} ')
 
-    perform_classification_on_features()
+    perform_classification_on_features(cluster_cnts)
 
 
 def stop_words_generation(channels):
@@ -195,7 +195,7 @@ def form_words(row, flag_train=False):
             for val in temp:
                 vec_list.append(words_embedding_dict[val])
 
-        words_embedding_dict[dict_key] = feature_sum(vec_list)
+        words_embedding_dict[dict_key] = mean_feature_sum(vec_list)
 
     return ''.join(temp)
 

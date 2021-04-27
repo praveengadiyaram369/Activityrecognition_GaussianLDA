@@ -4,7 +4,7 @@ from sklearn import svm, metrics
 from sklearn.ensemble import RandomForestClassifier
 
 from global_settings import *
-
+import csv
 
 def get_f1_score(X_train, y_train, X_test, y_test, model):
 
@@ -19,6 +19,8 @@ def get_f1_score(X_train, y_train, X_test, y_test, model):
     f1score = metrics.f1_score(y_test, preds, average='macro') * 100
 
     print(f'f1-score on features: {f1score} \n')
+
+    return f1score
 
 
 def feature_sum(vec_list):
@@ -104,15 +106,20 @@ def get_rfc_wordembds():
     return model
 
 
-def perform_classification_on_features():
+def perform_classification_on_features(cluster_cnts):
 
     print('................ after clustering.........')
 
     X_train, y_train, X_test, y_test = load_data()
     svc_model = get_svm_wordembds()
-    get_f1_score(X_train, y_train, X_test, y_test, svc_model)
+    svc_f1_score = get_f1_score(X_train, y_train, X_test, y_test, svc_model)
     rfc_model = get_rfc_wordembds()
-    get_f1_score(X_train, y_train, X_test, y_test, rfc_model)
+    rfc_f1_score = get_f1_score(X_train, y_train, X_test, y_test, rfc_model)
+
+    clf_data = [cluster_cnts, svc_f1_score, rfc_f1_score]
+    with open("output/clf_performance_data.csv", "a", newline='') as fp:
+        wr = csv.writer(fp, dialect='excel')
+        wr.writerow(clf_data)
 
 
 def perform_classification_on_rawfeatures(X_train, y_train, X_test, y_test):
