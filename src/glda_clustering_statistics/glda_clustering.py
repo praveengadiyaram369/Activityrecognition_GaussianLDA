@@ -9,7 +9,7 @@ from statistics import mode
 from embeddings_generator import get_cluster_embeddings, get_test_documents
 from glda_mapping import get_activity_topic_mapping
 
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, f1_score
 from sklearn.metrics.cluster import adjusted_rand_score
 from tqdm import tqdm
 
@@ -17,13 +17,13 @@ from tqdm import tqdm
 def print_testresults(test_results, classification_report_dict, cluster_cnts, window_length, window_overlap, doc_details):
 
     accuracy = classification_report_dict['accuracy']*100
-    ari = classification_report_dict['adjusted_rand_index_score']
-    weighted_average_precision = classification_report_dict['weighted avg']['precision'] * 100
-    weighted_average_recall = classification_report_dict['weighted avg']['recall'] * 100
-    weighted_average_f1_score = classification_report_dict['weighted avg']['f1-score'] * 100
+    ari = classification_report_dict['adjusted_rand_index_score']*100
+    f1_score_macro = classification_report_dict['f1_score_macro']*100
+    #weighted_average_precision = classification_report_dict['weighted avg']['precision'] * 100
+    #weighted_average_recall = classification_report_dict['weighted avg']['recall'] * 100
+    #weighted_average_f1_score = classification_report_dict['weighted avg']['f1-score'] * 100
 
-    glda_output = [window_length, window_overlap, cluster_cnts, accuracy, ari,
-                   weighted_average_precision, weighted_average_recall, weighted_average_f1_score]
+    glda_output = [window_length, window_overlap, cluster_cnts, accuracy, ari, f1_score_macro]
     doc_details.extend(glda_output)
 
     with open("output/glda_performance_data.csv", "a", newline='') as fp:
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     )
     print(f'Starting glda clustering training : {cluster_cnts} ')
     # Set training running
-    trainer.sample(50, 10)
+    trainer.sample(20, 5)
 
     activity_topic_mapping = get_activity_topic_mapping(
         list(set(activity_labels)), activity_doc_count_index)
@@ -126,6 +126,7 @@ if __name__ == "__main__":
 
     classification_report_dict = classification_report(
         test_doc_true, test_doc_glda, output_dict=True)
+    classification_report_dict['f1_score_macro'] = f1_score(test_doc_true, test_doc_glda, average='macro')
     classification_report_dict['adjusted_rand_index_score'] = adjusted_rand_score(
         test_doc_true, test_doc_glda)
 

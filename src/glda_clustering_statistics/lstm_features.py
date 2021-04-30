@@ -13,6 +13,7 @@ from sklearn import svm, metrics
 from sklearn.ensemble import RandomForestClassifier
 from scipy import stats
 import statistics
+import umap
 
 from global_settings import *
 from features_classification import perform_classification_on_features, perform_classification_on_rawfeatures
@@ -81,6 +82,19 @@ def cluster_word_sort(axis_clusters, cluster_names):
 
     return result.iloc[:, 1:]
 
+def reduce_feature_dimensions():
+
+    features = np.array(list(words_embedding_dict.values()))
+    umap_dimred = umap.UMAP(
+                            n_neighbors=30,
+                            min_dist=0.0,
+                            n_components=2,
+                            random_state=123,
+                            ).fit(features.reshape(-1, 40))
+    
+    for key, value in words_embedding_dict.items():
+        words_embedding_dict[key] = umap_dimred.transform(np.array(value).reshape(1, -1))[0].tolist()
+
 
 def perform_clustering(statistics_train, statistics_test, channels, cluster_cnts, words_generation_flag=False):
 
@@ -104,6 +118,10 @@ def perform_clustering(statistics_train, statistics_test, channels, cluster_cnts
     replace_leastidf_flag = False
     if replace_leastidf_flag:
         replace_leastidf_values()
+
+    reduce_feature_dim_flag = True
+    if reduce_feature_dim_flag:
+        reduce_feature_dimensions()
 
     # stop words generation
     stop_words_generation(channels)
