@@ -13,6 +13,7 @@ from sklearn import svm, metrics
 from sklearn.ensemble import RandomForestClassifier
 from scipy import stats
 import statistics
+import umap
 
 from global_settings import *
 from features_classification import perform_classification_on_features, perform_classification_on_rawfeatures
@@ -81,6 +82,19 @@ def cluster_word_sort(axis_clusters, cluster_names):
 
     return result.iloc[:, 1:]
 
+def reduce_feature_dimensions():
+
+    features = np.array(list(words_embedding_dict.values()))
+    umap_dimred = umap.UMAP(
+                            n_neighbors=30,
+                            min_dist=0.0,
+                            n_components=2,
+                            random_state=123,
+                            ).fit(features.reshape(-1, 40))
+    
+    for key, value in words_embedding_dict.items():
+        words_embedding_dict[key] = umap_dimred.transform(np.array(value).reshape(1, -1))[0].tolist()
+
 
 def perform_clustering(statistics_train, statistics_test, channels, cluster_cnts, words_generation_flag=False):
 
@@ -104,6 +118,10 @@ def perform_clustering(statistics_train, statistics_test, channels, cluster_cnts
     replace_leastidf_flag = False
     if replace_leastidf_flag:
         replace_leastidf_values()
+
+    reduce_feature_dim_flag = False
+    if reduce_feature_dim_flag:
+        reduce_feature_dimensions()
 
     # stop words generation
     stop_words_generation(channels)
@@ -130,7 +148,7 @@ def perform_clustering(statistics_train, statistics_test, channels, cluster_cnts
 
     print(f'Finished clustering  : {cluster_cnts} ')
 
-    perform_classification_on_features()
+    perform_classification_on_features(cluster_cnts)
 
 
 def stop_words_generation(channels):
@@ -195,7 +213,7 @@ def form_words(row, flag_train=False):
             for val in temp:
                 vec_list.append(words_embedding_dict[val])
 
-        words_embedding_dict[dict_key] = feature_sum(vec_list)
+        words_embedding_dict[dict_key] = mean_feature_sum(vec_list)
 
     return ''.join(temp)
 
@@ -216,7 +234,7 @@ def generate_word_combinations(word_combinations, flag_train):
 
 def new_words_generation(channels, flag_train=False):
 
-    two_word_combinations, three_word_combinations, four_word_combinations, five_word_combinations, six_word_combinations = False, True, True, True, False
+    two_word_combinations, three_word_combinations, four_word_combinations, five_word_combinations, six_word_combinations = False, False, False, False, False
     word_combinations_2 = [['X1', 'Y1'], ['X1', 'Z1'], ['Y1', 'Z1'], ['X1', 'Y2'], ['X1', 'Z2'], ['Y1', 'X2'], ['Y1', 'Z2'], ['Z1', 'X2'], ['Z1', 'Y2']]
     word_combinations_3 = [['X1', 'Y1', 'Z1'], ['X1', 'Y2', 'Z2'], ['Y1', 'X2', 'Z2'], ['Z1', 'X2', 'Y2']]
     word_combinations_4 = [['X1', 'Y1', 'Y2', 'Z2'], ['X1', 'Z1', 'X2', 'Y2'], ['Y1', 'Z1', 'X2', 'Z2'], [
@@ -340,6 +358,21 @@ def perform_clf(features_train, features_test, subject_activity_data_train, subj
 
     perform_classification_on_rawfeatures(X_train, y_train, X_test, y_test)
 
+def umap_transform_data(sensor_features_train, sensor_features_test):
+
+    train_idx = sensor_features_train.shape[0]
+    sensor_data = np.vstack((sensor_features_train, sensor_features_test))
+    umap_transformed_data = umap.UMAP(
+                            n_neighbors=30,
+                            min_dist=0.1,
+                            n_components=4,
+                            random_state=123,
+                            ).fit_transform(sensor_data)
+
+    sensor_features_train = umap_transformed_data[:train_idx]
+    sensor_features_test = umap_transformed_data[train_idx:]
+
+    return sensor_features_train, sensor_features_test
 
 if __name__ == '__main__':
 
@@ -363,6 +396,10 @@ if __name__ == '__main__':
 
     sensory_words_testdf['subject_id'] = subject_activity_data_test[:,0].astype(int)
     sensory_words_testdf['activityID'] = subject_activity_data_test[:,1].astype(int)
+
+    umap_transform_data_flag = False
+    if umap_transform_data_flag:
+        sensor_features_train, sensor_features_test = umap_transform_data(sensor_features_train, sensor_features_test)
 
     train_channel_len = int(sensor_features_train.shape[0]/6)
     test_channel_len = int(sensor_features_test.shape[0]/6)
