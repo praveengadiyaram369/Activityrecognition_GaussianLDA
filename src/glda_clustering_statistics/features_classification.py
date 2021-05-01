@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.preprocessing import Normalizer
 from sklearn import svm, metrics
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.mixture import GaussianMixture
 
 from global_settings import *
 
@@ -121,3 +122,18 @@ def perform_classification_on_rawfeatures(X_train, y_train, X_test, y_test):
     get_f1_score(X_train, y_train, X_test, y_test, svc_model)
     rfc_model = get_rfc_wordembds()
     get_f1_score(X_train, y_train, X_test, y_test, rfc_model)
+
+
+def perform_clustering_gmm():
+
+    print('##### clustering ####')
+
+    X_train, y_train, X_test, y_test = load_data()
+
+    gmm = GaussianMixture(n_components=6).fit(X_train)
+    labels = gmm.predict(X_train)
+    df_cluster = pd.DataFrame(y_train, columns=("activity",))
+    df_cluster['clusterIds'] = labels
+    df_cluster = df_grouped = df_cluster.groupby(["activity", "clusterIds"]).agg(
+        count_col=pd.NamedAgg(column="clusterIds", aggfunc="count"))
+    print(df_cluster)

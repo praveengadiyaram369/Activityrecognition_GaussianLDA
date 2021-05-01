@@ -13,7 +13,7 @@ from scipy import stats
 import statistics
 
 from global_settings import *
-from features_classification import perform_classification_on_features, perform_classification_on_rawfeatures
+from features_classification import perform_classification_on_features, perform_classification_on_rawfeatures, perform_clustering_gmm
 
 
 # assigning words for each cluster
@@ -130,6 +130,7 @@ def perform_clustering(statistics_train, statistics_test, channels, cluster_cnts
     print(f'Finished clustering  : {cluster_cnts} ')
 
     perform_classification_on_features()
+    perform_clustering_gmm()
 
 
 def stop_words_generation(channels):
@@ -373,8 +374,8 @@ if __name__ == '__main__':
     feature_dim = int(sys.argv[1])
     pooling_size = int(sys.argv[2])
     cluster_cnts = int(sys.argv[3])
-    window_length = 16
-    window_overlap = 16
+    window_length = int(sys.argv[4])
+    window_overlap = int(sys.argv[5])
 
     train_file_path = os.getcwd() + f'/../../data/output_csv/processed_data_train.csv'
     test_file_path = os.getcwd() + f'/../../data/output_csv/processed_data_test.csv'
