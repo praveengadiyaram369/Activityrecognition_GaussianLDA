@@ -108,21 +108,29 @@ def get_rfc_wordembds():
 
     return model
 
+def write_data_tofile(data_list):
+
+    with open("output/clf_performance_data.csv", "a", newline='') as fp:
+        wr = csv.writer(fp, dialect='excel')
+        wr.writerow(data_list)
 
 def perform_classification_on_features(cluster_cnts):
 
     print('................ after clustering.........')
 
     X_train, y_train, X_test, y_test = load_data()
+    
     svc_model = get_svm_wordembds()
     svc_f1_score = get_f1_score(X_train, y_train, X_test, y_test, svc_model)
+
     rfc_model = get_rfc_wordembds()
     rfc_f1_score = get_f1_score(X_train, y_train, X_test, y_test, rfc_model)
 
-    clf_data = [cluster_cnts, svc_f1_score, rfc_f1_score]
-    with open("output/clf_performance_data.csv", "a", newline='') as fp:
-        wr = csv.writer(fp, dialect='excel')
-        wr.writerow(clf_data)
+    gmm_f1_score = perform_clustering_gmm(X_train, y_train, X_test, y_test)
+    
+    clf_data = [cluster_cnts, svc_f1_score, rfc_f1_score, gmm_f1_score]
+    write_data_tofile(clf_data)
+    
 
 
 def perform_classification_on_rawfeatures(X_train, y_train, X_test, y_test):
@@ -135,11 +143,9 @@ def perform_classification_on_rawfeatures(X_train, y_train, X_test, y_test):
     get_f1_score(X_train, y_train, X_test, y_test, rfc_model)
 
 
-def perform_clustering_gmm():
+def perform_clustering_gmm(X_train, y_train, X_test, y_test):
 
     print('##### clustering ####')
-
-    X_train, y_train, X_test, y_test = load_data()
 
     gmm = GaussianMixture(n_components=6).fit(X_train)
     labels = gmm.predict(X_train)
@@ -154,3 +160,5 @@ def perform_clustering_gmm():
     f1score = metrics.f1_score(y_test, labels_map_activity, average='macro') * 100
 
     print(f'f1-score on clustering of features: {f1score} \n')
+
+    return f1score

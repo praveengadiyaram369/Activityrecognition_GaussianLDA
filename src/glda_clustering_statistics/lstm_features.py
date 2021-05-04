@@ -16,7 +16,7 @@ import statistics
 import umap
 
 from global_settings import *
-from features_classification import perform_classification_on_features, perform_classification_on_rawfeatures
+from features_classification import perform_classification_on_features, perform_classification_on_rawfeatures, perform_clustering_gmm
 
 # assigning words for each cluster
 def get_assigned_words(seq_clusters, cluster_words, axis, flag_train=False):
@@ -234,7 +234,7 @@ def generate_word_combinations(word_combinations, flag_train):
 
 def new_words_generation(channels, flag_train=False):
 
-    two_word_combinations, three_word_combinations, four_word_combinations, five_word_combinations, six_word_combinations = False, False, False, False, False
+    two_word_combinations, three_word_combinations, four_word_combinations, five_word_combinations, six_word_combinations = False, True, True, True, False
     word_combinations_2 = [['X1', 'Y1'], ['X1', 'Z1'], ['Y1', 'Z1'], ['X1', 'Y2'], ['X1', 'Z2'], ['Y1', 'X2'], ['Y1', 'Z2'], ['Z1', 'X2'], ['Z1', 'Y2']]
     word_combinations_3 = [['X1', 'Y1', 'Z1'], ['X1', 'Y2', 'Z2'], ['Y1', 'X2', 'Z2'], ['Z1', 'X2', 'Y2']]
     word_combinations_4 = [['X1', 'Y1', 'Y2', 'Z2'], ['X1', 'Z1', 'X2', 'Y2'], ['Y1', 'Z1', 'X2', 'Z2'], [

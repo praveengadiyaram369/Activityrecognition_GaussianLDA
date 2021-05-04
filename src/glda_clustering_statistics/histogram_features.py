@@ -130,7 +130,6 @@ def perform_clustering(statistics_train, statistics_test, channels, cluster_cnts
     print(f'Finished clustering  : {cluster_cnts} ')
 
     perform_classification_on_features()
-    perform_clustering_gmm()
 
 
 def stop_words_generation(channels):
