@@ -1,8 +1,10 @@
 import numpy as np
+import pandas as pd
 from sklearn.preprocessing import Normalizer
 from sklearn import svm, metrics
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.mixture import GaussianMixture
+from glda_mapping import topic_doc_mapping
 
 from global_settings import *
 import csv
@@ -141,8 +143,14 @@ def perform_clustering_gmm():
 
     gmm = GaussianMixture(n_components=6).fit(X_train)
     labels = gmm.predict(X_train)
+    labels_test = gmm.predict(X_test)
     df_cluster = pd.DataFrame(y_train, columns=("activity",))
     df_cluster['clusterIds'] = labels
     df_cluster = df_grouped = df_cluster.groupby(["activity", "clusterIds"]).agg(
         count_col=pd.NamedAgg(column="clusterIds", aggfunc="count"))
-    print(df_cluster)
+    df_pivotClusters = pd.pivot_table(df_cluster, values='count_col', index='activity', columns='clusterIds').fillna(0)
+    activity_cluster_map = topic_doc_mapping(df_pivotClusters)
+    labels_map_activity = list((pd.Series(labels_test)).map(activity_cluster_map))
+    f1score = metrics.f1_score(y_test, labels_map_activity, average='macro') * 100
+
+    print(f'f1-score on clustering of features: {f1score} \n')
