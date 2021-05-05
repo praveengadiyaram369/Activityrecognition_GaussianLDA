@@ -129,7 +129,7 @@ def perform_clustering(statistics_train, statistics_test, channels, cluster_cnts
 
     print(f'Finished clustering  : {cluster_cnts} ')
 
-    perform_classification_on_features()
+    perform_classification_on_features(cluster_cnts)
 
 
 def stop_words_generation(channels):
@@ -186,8 +186,9 @@ def write_clustering_output(channels, flag_train=False):
 def form_words(row, flag_train=False):
 
     temp = list(row.values.astype(str))
-    if flag_train:
-        dict_key = ''.join(temp)
+    dict_key = ''.join(temp)
+
+    if dict_key not in words_embedding_dict.keys():
 
         for _ in range(len(words_embedding_dict[temp[0]])):
             vec_list = []
@@ -196,7 +197,7 @@ def form_words(row, flag_train=False):
 
         words_embedding_dict[dict_key] = feature_sum(vec_list)
 
-    return ''.join(temp)
+    return dict_key
 
 
 def generate_word_combinations(word_combinations, flag_train):

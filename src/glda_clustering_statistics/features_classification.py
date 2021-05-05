@@ -58,8 +58,7 @@ def get_feature_vector_fromwords(instance_words):
 def get_feature_data(main_df):
 
     activity_subject_df_train = main_df[['activityID', 'subject_id']].drop_duplicates().values.astype('int32')
-    col_names = ['subject_id', 'activityID',
-                 'X1', 'Y1', 'Z1', 'X2', 'Y2', 'Z2']
+    col_names = main_df.columns[:-1]
 
     X = []
     y = []
@@ -152,7 +151,7 @@ def perform_clustering_gmm(X_train, y_train, X_test, y_test):
     labels_test = gmm.predict(X_test)
     df_cluster = pd.DataFrame(y_train, columns=("activity",))
     df_cluster['clusterIds'] = labels
-    df_cluster = df_grouped = df_cluster.groupby(["activity", "clusterIds"]).agg(
+    df_cluster = df_cluster.groupby(["activity", "clusterIds"]).agg(
         count_col=pd.NamedAgg(column="clusterIds", aggfunc="count"))
     df_pivotClusters = pd.pivot_table(df_cluster, values='count_col', index='activity', columns='clusterIds').fillna(0)
     activity_cluster_map = topic_doc_mapping(df_pivotClusters)
