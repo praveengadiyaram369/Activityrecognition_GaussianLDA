@@ -314,6 +314,7 @@ def feature_sum(vec_list):
     try:
         for idx in range(1, len(vec_list)):
             vec_sum += vec_list[idx]
+        vec_sum = vec_sum/len(vec_list)
     except:
         print(vec_list)
         exit()
