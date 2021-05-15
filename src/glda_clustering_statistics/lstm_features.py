@@ -16,7 +16,7 @@ import statistics
 import umap
 
 from global_settings import *
-from features_classification import perform_classification_on_features, perform_classification_on_rawfeatures, perform_clustering_gmm
+from features_classification import perform_classification_on_features, perform_classification_on_rawfeatures
 
 # assigning words for each cluster
 def get_assigned_words(seq_clusters, cluster_words, axis, flag_train=False):
@@ -148,7 +148,7 @@ def perform_clustering(statistics_train, statistics_test, channels, cluster_cnts
 
     print(f'Finished clustering  : {cluster_cnts} ')
 
-    perform_classification_on_features(cluster_cnts)
+    #perform_classification_on_features(cluster_cnts)
 
 
 def stop_words_generation(channels):
@@ -235,7 +235,7 @@ def generate_word_combinations(word_combinations, flag_train):
 
 def new_words_generation(channels, flag_train=False):
 
-    two_word_combinations, three_word_combinations, four_word_combinations, five_word_combinations, six_word_combinations = False, True, False, False, False
+    two_word_combinations, three_word_combinations, four_word_combinations, five_word_combinations, six_word_combinations = False, True, True, True, False
     word_combinations_2 = [['X1', 'Y1'], ['X1', 'Z1'], ['Y1', 'Z1'], ['X1', 'Y2'], ['X1', 'Z2'], ['Y1', 'X2'], ['Y1', 'Z2'], ['Z1', 'X2'], ['Z1', 'Y2']]
     word_combinations_3 = [['X1', 'Y1', 'Z1'], ['X1', 'Y2', 'Z2'], ['Y1', 'X2', 'Z2'], ['Z1', 'X2', 'Y2']]
     word_combinations_4 = [['X1', 'Y1', 'Y2', 'Z2'], ['X1', 'Z1', 'X2', 'Y2'], ['Y1', 'Z1', 'X2', 'Z2'], [
@@ -342,7 +342,7 @@ def extract_feature_info_lstmdata(label_cnt, step_cnt, features, subject_activit
     return X, y
 
 
-def perform_clf(features_train, features_test, subject_activity_data_train, subject_activity_data_test):
+def perform_clf(features_train, features_test, subject_activity_data_train, subject_activity_data_test, cluster_cnts):
 
     train_label_cnt = 7352
     test_label_cnt = 2947
@@ -357,7 +357,7 @@ def perform_clf(features_train, features_test, subject_activity_data_train, subj
     X_test = np.array(X_test).reshape(-1,feature_dim).astype('float32')
     y_test = np.array(y_test).astype('int32')
 
-    perform_classification_on_rawfeatures(X_train, y_train, X_test, y_test)
+    perform_classification_on_rawfeatures(X_train, y_train, X_test, y_test, cluster_cnts)
 
 def umap_transform_data(sensor_features_train, sensor_features_test):
 
@@ -409,7 +409,7 @@ if __name__ == '__main__':
     features_train = sensor_features_train.reshape(6, train_channel_len, feature_dim)
     features_test = sensor_features_test.reshape(6, test_channel_len, feature_dim)
 
-    perform_clf(features_train, features_test, subject_activity_data_train, subject_activity_data_test)
+    perform_clf(features_train, features_test, subject_activity_data_train, subject_activity_data_test, cluster_cnts)
 
     perform_clustering(features_train, features_test,
                        channels=col_names[2:], cluster_cnts=cluster_cnts, words_generation_flag=True)

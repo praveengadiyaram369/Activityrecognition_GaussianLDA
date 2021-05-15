@@ -4,6 +4,7 @@ from sklearn.preprocessing import Normalizer
 from sklearn import svm, metrics
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.mixture import GaussianMixture
+from sklearn.cluster import KMeans
 from glda_mapping import topic_doc_mapping
 
 from global_settings import *
@@ -107,6 +108,23 @@ def get_rfc_wordembds():
 
     return model
 
+
+def get_kmeans_wordembds():
+
+    print('................ kmeans classifer .........')
+
+    model = KMeans(n_clusters=6)
+    return model
+
+
+def get_gmm_wordembds():
+
+    print('................ gmm classfier .........')
+
+    model = GaussianMixture(n_components=6)
+    return model
+
+
 def write_data_tofile(data_list):
 
     with open("output/clf_performance_data.csv", "a", newline='') as fp:
@@ -125,39 +143,52 @@ def perform_classification_on_features(cluster_cnts):
     rfc_model = get_rfc_wordembds()
     rfc_f1_score = get_f1_score(X_train, y_train, X_test, y_test, rfc_model)
 
-    gmm_f1_score = perform_clustering_gmm(X_train, y_train, X_test, y_test)
+    #kmeans_model = get_gmm_wordembds()
+    #kmeans_f1_score = perform_clustering(X_train, y_train, X_test, y_test, kmeans_model)
+
+    #gmm_model = get_gmm_wordembds()
+    #gmm_f1_score = perform_clustering(X_train, y_train, X_test, y_test, gmm_model)
     
-    clf_data = [cluster_cnts, svc_f1_score, rfc_f1_score, gmm_f1_score]
-    write_data_tofile(clf_data)
+    #clf_data = [cluster_cnts, svc_f1_score, rfc_f1_score, kmeans_f1_score, gmm_f1_score]
+    #write_data_tofile(clf_data)
     
 
-
-def perform_classification_on_rawfeatures(X_train, y_train, X_test, y_test):
-
-    print('................ before clustering.........')
+def perform_classification_on_rawfeatures(X_train, y_train, X_test, y_test,cluster_cnts):
 
     svc_model = get_svm_wordembds()
-    get_f1_score(X_train, y_train, X_test, y_test, svc_model)
+    svc_f1_score = get_f1_score(X_train, y_train, X_test, y_test, svc_model)
+
     rfc_model = get_rfc_wordembds()
-    get_f1_score(X_train, y_train, X_test, y_test, rfc_model)
+    rfc_f1_score = get_f1_score(X_train, y_train, X_test, y_test, rfc_model)
 
+    kmeans_model = get_gmm_wordembds()
+    kmeans_f1_score = perform_clustering(X_train, y_train, X_test, y_test, kmeans_model)
 
-def perform_clustering_gmm(X_train, y_train, X_test, y_test):
+    gmm_model = get_gmm_wordembds()
+    gmm_f1_score = perform_clustering(X_train, y_train, X_test, y_test, gmm_model)
+    
+    clf_data = [cluster_cnts, svc_f1_score, rfc_f1_score, kmeans_f1_score, gmm_f1_score]
+
+    write_data_tofile(clf_data)
+
+def perform_clustering(X_train, y_train, X_test, y_test, model):
 
     print('##### clustering ####')
 
-    gmm = GaussianMixture(n_components=6).fit(X_train)
-    labels = gmm.predict(X_train)
-    labels_test = gmm.predict(X_test)
+    model = model.fit(X_train)
+    labels = model.predict(X_train)
+    labels_test = model.predict(X_test)
     df_cluster = pd.DataFrame(y_train, columns=("activity",))
     df_cluster['clusterIds'] = labels
     df_cluster = df_cluster.groupby(["activity", "clusterIds"]).agg(
         count_col=pd.NamedAgg(column="clusterIds", aggfunc="count"))
     df_pivotClusters = pd.pivot_table(df_cluster, values='count_col', index='activity', columns='clusterIds').fillna(0)
+    
+    print(df_pivotClusters)
+    
     activity_cluster_map = topic_doc_mapping(df_pivotClusters)
     labels_map_activity = list((pd.Series(labels_test)).map(activity_cluster_map))
     f1score = metrics.f1_score(y_test, labels_map_activity, average='macro') * 100
-
-    print(f'f1-score on clustering of features: {f1score} \n')
+    print(f'f1-score on features: {f1score} \n')
 
     return f1score
