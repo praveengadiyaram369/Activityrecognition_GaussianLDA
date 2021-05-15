@@ -10,6 +10,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import Normalizer
 from gensim import corpora, models
 import matplotlib.pyplot as plt
+from sklearn.model_selection import cross_val_score, StratifiedKFold
 
 train_docs = []
 train_doc_labels = []
@@ -329,7 +330,18 @@ def get_cluster_embeddings(input_txt_filepath_train, input_txt_filepath_test, em
 
 
 def get_test_documents():
-    return test_docs, test_doc_labels
+
+    skf = StratifiedKFold(n_splits=3)
+    train_docs_fold = [] 
+    train_doc_labels_fold = []
+
+    for _, test_index in skf.split(train_docs, train_doc_labels):
+        test_index = np.array(test_index)
+        train_docs_fold, train_doc_labels_fold = np.array(train_docs)[test_index], np.array(train_doc_labels)[test_index]
+        break
+    
+    return train_docs_fold, train_doc_labels_fold
+    #return test_docs, test_doc_labels
 
 
 def reset_global_data():
