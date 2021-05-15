@@ -161,7 +161,7 @@ def perform_classification_on_rawfeatures(X_train, y_train, X_test, y_test,clust
     rfc_model = get_rfc_wordembds()
     rfc_f1_score = get_f1_score(X_train, y_train, X_test, y_test, rfc_model)
 
-    kmeans_model = get_gmm_wordembds()
+    kmeans_model = get_kmeans_wordembds()
     kmeans_f1_score = perform_clustering(X_train, y_train, X_test, y_test, kmeans_model)
 
     gmm_model = get_gmm_wordembds()
