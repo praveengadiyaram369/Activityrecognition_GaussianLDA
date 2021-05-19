@@ -210,7 +210,7 @@ if __name__ == '__main__':
     #print('\n\n\n')
     print('writing result....')
 
-    data=[window_length,window_overlap,f1_train]
+    data=[window_length,window_overlap,f1_train,rf_f1train,rf_f1test,gmm_f1score,kmm_f1score]
     
 
     with open(os.getcwd() + f'/../../data/result_new_stats.csv', "a", newline='') as fp:
