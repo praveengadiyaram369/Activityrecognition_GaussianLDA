@@ -13,7 +13,7 @@ from scipy import stats
 import statistics
 
 from global_settings import *
-from features_classification import perform_classification_on_features, perform_classification_on_rawfeatures, perform_clustering_gmm
+from features_classification import perform_classification_on_features, perform_classification_on_rawfeatures
 
 
 # assigning words for each cluster
@@ -414,6 +414,14 @@ if __name__ == '__main__':
         train_subject_activity_seq, pooled_features_train, pooling_size)
     test_subject_activity_seq_pooled, test_subsequences_pooled = onehotenocding_pooling(
         test_subject_activity_seq, pooled_features_test, pooling_size)
+
+    channel_patterns = []
+    for i in range(6):
+        channel_patterns.extend(np.unique(train_subsequences_pooled[i], axis=0).tolist())
+
+    channel_patterns = np.unique(np.array(channel_patterns), axis=0)
+    print(channel_patterns)
+    np.savetxt('output/histogram_patterns.csv', channel_patterns, delimiter=',')
 
     assert train_subject_activity_seq_pooled.shape[1] == train_subsequences_pooled.shape[1]
     assert test_subject_activity_seq_pooled.shape[1] == test_subsequences_pooled.shape[1]
