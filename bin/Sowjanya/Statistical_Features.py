@@ -53,12 +53,12 @@ def Extract_features(main_df, window_length, window_overlap):
         for i in range(0,len(subsequences)):
             mean=sum(subsequences[i])/len(subsequences[i])
             std=statistics.stdev(subsequences[i])
-            skewness=stats.skew(subsequences[i])
-            q3,q2,q1=np.percentile(subsequences[i],[75 ,50,25])        
-            iqr=q3-q1
-            slope=subsequences[i][0]-subsequences[i][len(subsequences[i])-1]
-            energy=sum(subsequences[i]*subsequences[i])/len(subsequences[i])
-            data.append([mean,std,skewness,iqr,slope,energy])
+            #skewness=stats.skew(subsequences[i])
+            #q3,q2,q1=np.percentile(subsequences[i],[75 ,50,25])        
+            #iqr=q3-q1
+            #slope=subsequences[i][0]-subsequences[i][len(subsequences[i])-1]
+            #energy=sum(subsequences[i]*subsequences[i])/len(subsequences[i])
+            data.append([mean,std])
             data1=np.array(data)
         raw_features=zip(data1)
         Id=pd.DataFrame(raw_features,columns=[j])

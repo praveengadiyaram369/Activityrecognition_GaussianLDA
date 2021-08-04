@@ -13,20 +13,47 @@
 7) nohup ./words_generator.sh >> words_generator_log.log &
 
 nohup ./words_generator.sh >> histogram_features.log &
+nohup ./words_generator_2.sh >> histogram_features_2.log &
+nohup ./words_generator.sh >> lstm_features_log.log &
 
 8) tail -100f words_generator_log.log
-tail -2f output/glda_performance_data.csv
+tail -40f output/glda_performance_data.csv
+tail -40f output/clf_performance_data.csv
 
-tail -500f histogram_features.log
+tail -5000f histogram_features.log
+tail -500f lstm_features_log.log
 
 9) ps -eaf | grep words_generator
+ps -eaf | grep lstm_features
+ps -eaf | grep glda
 ps -eaf | grep python
 
 vi words_generator.sh
 
+python lstm_features.py 1000
+python lstm_features_1.py 1000
+python lstm_features_2.py 1000
+
+python lstm_features_1.py 500
+python lstm_features_1.py 1000
+python lstm_features_1.py 1500
+
+python lstm_features_2.py 500
+python lstm_features_2.py 1000
+python lstm_features_2.py 1500
+
+python lstm_features.py 100
+python glda_clustering.py 100 16 12
+
+python lstm_features.py 500
+python glda_clustering.py 500 16 12
+
+python lstm_features.py 1000
+python glda_clustering.py 1000 16 12
+
 /home/schennamaneni/.local/share/virtualenvs/Human_Activity_Recognition-MQQGi2X7/bin/python
 
-scp glda_clustering.py schennamaneni@141.26.12.33:/home/schennamaneni/Human_Activity_Recognition/src/glda_clustering_statistics
+scp glda_clustering.py schennamaneni@141.26.12.33:/home/schennamaneni/Human_Activity_Recognition/src/glda_clustering_statistics     
 
 Inside Human_Activity_Recognition/src/glda_clustering_statistics folder, execute nohup ./words_generator.sh >> words_generator_log.log &
 
@@ -47,3 +74,17 @@ python glda_clustering.py 1000 16 8
 
 python histogram_features.py 100 5 1000
 python glda_clustering.py 1000 16 8
+
+
+/Users/srisaipraveengadiyaram/Documents/python_programming/Human_Activity_Recognition/Pipfile 
+
+python lstm_features.py 500 >> lstm_features_log.log &
+
+1500,80.86453062407159,80.20759557863558,55.178809547151694
+1500,80.86453062407159,80.19871141723036,43.105757019185894
+1500,80.86453062407159,80.21725352412756,56.90984252503301
+
+
+1000,80.12553499131111,80.9400452281599,32.59503608200821
+1000,79.9075220146884,80.7640876338204,42.108777154118556
+1000,80.2195812899968,81.45964245171767,41.92575498577097

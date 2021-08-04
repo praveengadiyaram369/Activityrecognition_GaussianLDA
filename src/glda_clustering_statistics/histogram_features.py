@@ -140,7 +140,7 @@ def stop_words_generation(channels):
 
         stopwords = sensory_words_traindf[[channel, 'activityID']].groupby(channel)[
             'activityID'].nunique()
-        stopwords = stopwords[stopwords > 3].keys().tolist()
+        stopwords = stopwords[stopwords > 2].keys().tolist()
 
         return stopwords
 

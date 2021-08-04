@@ -289,7 +289,7 @@ def get_embeddings(embeddings_filepath,cluster_cnts=100, flag_jsonfile=False):
 def get_cluster_embeddings(input_txt_filepath_train, input_txt_filepath_test, embeddings_filepath, cluster_cnts):
 
     reset_global_data()
-    stop_words_new_vocab_flag = False
+    stop_words_new_vocab_flag = True
     activity_doc_count_index = load_data(
         input_txt_filepath_train, train_or_test_flag=True)
     load_data(input_txt_filepath_test, train_or_test_flag=False)
@@ -331,7 +331,7 @@ def get_cluster_embeddings(input_txt_filepath_train, input_txt_filepath_test, em
 
 def get_test_documents():
 
-    skf = StratifiedKFold(n_splits=3)
+    """skf = StratifiedKFold(n_splits=3)
     train_docs_fold = [] 
     train_doc_labels_fold = []
 
@@ -340,8 +340,8 @@ def get_test_documents():
         train_docs_fold, train_doc_labels_fold = np.array(train_docs)[test_index], np.array(train_doc_labels)[test_index]
         break
     
-    return train_docs_fold, train_doc_labels_fold
-    #return test_docs, test_doc_labels
+    return train_docs_fold, train_doc_labels_fold"""
+    return test_docs, test_doc_labels
 
 
 def reset_global_data():

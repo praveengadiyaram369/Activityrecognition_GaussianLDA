@@ -411,7 +411,7 @@ if __name__ == '__main__':
 
     perform_clf(features_train, features_test, subject_activity_data_train, subject_activity_data_test, cluster_cnts)
 
-    perform_clustering(features_train, features_test,
-                       channels=col_names[2:], cluster_cnts=cluster_cnts, words_generation_flag=True)
+    #perform_clustering(features_train, features_test,
+    #                   channels=col_names[2:], cluster_cnts=cluster_cnts, words_generation_flag=True)
 
     print('Ending lstm features....')
