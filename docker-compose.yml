@@ -1,0 +1,10 @@
+version: '3.8'
+services: 
+  glda_app:
+    build: 
+      context: ./
+      dockerfile: Dockerfile
+    image: glda_image:v1
+    container_name: glda_web_tester
+    volumes: 
+      
