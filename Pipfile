@@ -7,7 +7,6 @@ verify_ssl = true
 autopep8 = "*"
 
 [packages]
-numpy = "*"
 cython = "*"
 choldate = {editable = true,git = "https://github.com/modusdatascience/choldate.git"}
 sklearn = "*"
@@ -23,6 +22,9 @@ tensorflow = "==2.2.0"
 keras-tuner = "*"
 tqdm = "*"
 gaussianlda = {editable = true,git = "https://github.com/praveengadiyaram369/gaussianlda.git",ref = "topic_dist_per_doc"}
+fastapi = "*"
+pydantic = "*"
+numpy = "*"
 
 [requires]
 python_version = "3.7"
