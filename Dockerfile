@@ -11,7 +11,10 @@ COPY requirements.txt ${PROJECT_DIR}
 
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
+RUN pip install git+git://github.com/jcrudy/choldate.git#egg=choldate
+RUN pip install git+https://github.com/praveengadiyaram369/gaussianlda.git@topic_dist_per_doc#egg=gaussianlda
+
 
 COPY API ${PROJECT_DIR}
-WORKDIR ${PROJECT_DIR}/API/models
-CMD ["/startapp.sh"]
+EXPOSE 8080
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8080"]

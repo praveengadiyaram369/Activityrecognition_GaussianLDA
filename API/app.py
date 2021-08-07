@@ -42,7 +42,7 @@ def load_test_instances():
     global test_instances
     global test_instance_labels
 
-    test_filepath = os.getcwd() + '/../data/output_csv/processed_data_test.csv'
+    test_filepath = os.getcwd() + '/data/processed_data_test.csv'
     test_data = np.loadtxt(test_filepath, delimiter=',')
 
     doc_ids = (test_data[:, 0].reshape(2947,128))[:, 0]

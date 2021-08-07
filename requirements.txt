@@ -10,7 +10,8 @@
  scikit-learn==0.24.1
  pandas==1.2.3
  fastapi==0.68.0
- Cython ==0.29.24
- -e git+https://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@github.com/modusdatascience/choldate.git#egg=choldate
- -e git+https://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@github.com/praveengadiyaram369/gaussianlda.git@topic_dist_per_doc#egg=gaussianlda
+ Cython==0.29.24
+ Jinja2==2.11.2
+ python-multipart==0.0.5
+ starlette==0.14.2
  
